@@ -1,0 +1,53 @@
+#include "queenofclocks.h"
+
+struct g g={0};
+
+void egg_client_quit(int status) {
+}
+
+/* Init.
+ ******************************************************************/
+
+int egg_client_init() {
+
+  int fbw=0,fbh=0;
+  egg_texture_get_size(&fbw,&fbh,1);
+  if ((fbw!=FBW)||(fbh!=FBH)) {
+    fprintf(stderr,"Framebuffer size mismatch! metadata=%dx%d header=%dx%d\n",fbw,fbh,FBW,FBH);
+    return -1;
+  }
+
+  g.romc=egg_rom_get(0,0);
+  if (!(g.rom=malloc(g.romc))) return -1;
+  egg_rom_get(g.rom,g.romc);
+  if (qc_res_init()<0) return -1;
+  
+  if (egg_texture_load_image(g.texid_terrain=egg_texture_new(),RID_image_terrain)<0) return -1;
+  if (egg_texture_load_image(g.texid_sprites=egg_texture_new(),RID_image_sprites)<0) return -1;
+  if (egg_texture_load_raw(g.texid_bgbits=egg_texture_new(),FBW,FBH,FBW<<2,0,0)<0) return -1;
+
+  srand_auto();
+  
+  // We only have one song and it plays forever.
+  egg_play_song(1,1,1,1.0f,0.0f);
+  
+  if (qc_scene_load(RID_map_start)<0) return -1;
+
+  return 0;
+}
+
+/* Update.
+ *********************************************************************/
+
+void egg_client_update(double elapsed) {
+  //TODO
+}
+
+/* Render.
+ ****************************************************************************/
+
+void egg_client_render() {
+  graf_reset(&g.graf);
+  qc_scene_render();
+  graf_flush(&g.graf);
+}
