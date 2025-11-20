@@ -1,0 +1,106 @@
+/* sprite.h
+ */
+ 
+#ifndef SPRITE_H
+#define SPRITE_H
+
+struct sprite;
+struct sprite_type;
+struct sprite_group;
+
+struct sprite {
+  const struct sprite_type *type;
+  int refc;
+  struct sprite_group **grpv;
+  int grpc,grpa;
+  double x,y,w,h; // m. (x,y) are the top-left corner, and bounds are not always square.
+  int layer; // Render order, 0..0xffff. Default 256.
+  uint8_t tileid,xform;
+  uint32_t arg; // From spawn point.
+  int rid;
+  const void *cmd; // From resource.
+  int cmdc;
+};
+
+struct sprite_type {
+  const char *name;
+  int objlen;
+  void (*del)(struct sprite *sprite);
+  int (*init)(struct sprite *sprite);
+  void (*update)(struct sprite *sprite,double elapsed);
+  
+  /* If you don't implement, the wrapper will draw (tileid,xform) at the middle of your physical bounds.
+   * (dstx,dsty) are your (x,y) quantized to framebuffer pixels.
+   * Sprites may assume that (g.texid_sprites) is active in (g.graf). If you set it otherwise, put it back before returning.
+   */
+  void (*render)(struct sprite *sprite,int dstx,int dsty);
+};
+
+struct sprite_group {
+  int refc; // 0 if immortal, eg the global groups
+  struct sprite **sprv;
+  int sprc,spra;
+  int order;
+};
+
+#define SPRITE_GROUP_ORDER_ADDR     0 /* Default: Sort sprites by address. Efficient but unpredictable order. */
+#define SPRITE_GROUP_ORDER_EXPLICIT 1 /* Retain the order added. Searches are expensive. */
+#define SPRITE_GROUP_ORDER_RENDER   2 /* For the render group only. */
+
+/* Generic sprite.
+ ****************************************************************************/
+
+/* Sprite allocation and deletion.
+ * These should not be used by the program at large.
+ * Prefer "spawn" and "deathrow".
+ */
+void sprite_del(struct sprite *sprite);
+struct sprite *sprite_new(double x,double y,const struct sprite_type *type,int rid,uint32_t arg,const void *cmd,int cmdc);
+int sprite_ref(struct sprite *sprite);
+
+/* Create, initialize, and register a new sprite with midpoint at (x,y) in meters.
+ * (type) may be null if you provide (cmd), and (cmd) maybe empty if you provide (rid).
+ * Returns WEAK.
+ */
+struct sprite *sprite_spawn(
+  double x,double y,
+  const struct sprite_type *type,
+  int rid,uint32_t arg,
+  const void *cmd,int cmdc
+);
+
+/* Sprite types.
+ ***************************************************************************/
+ 
+#define _(tag) extern const struct sprite_type sprite_type_##tag;
+FOR_EACH_SPRTYPE
+#undef _
+
+const struct sprite_type *sprite_type_from_id(int id);
+const struct sprite_type *sprite_type_from_commands(const void *v,int c);
+
+/* Sprite group.
+ *************************************************************************/
+ 
+void sprite_group_del(struct sprite_group *group);
+struct sprite_group *sprite_group_new();
+int sprite_group_ref(struct sprite_group *group);
+
+/* All sprite<->group links are mutual.
+ * So we only phrase them with group first; "sprite_add_group" would be redundant.
+ */
+int sprite_group_has(const struct sprite_group *group,const struct sprite *sprite);
+int sprite_group_add(struct sprite_group *group,struct sprite *sprite);
+int sprite_group_remove(struct sprite_group *group,struct sprite *sprite);
+
+/* "Kill" removes a sprite immediately from all groups, including keepalive, which usually deletes the sprite too.
+ * "Clear" is the equivalent operation on a group.
+ * Or you can kill a group, ie remove all groups from all members of this group. That's what deathrow does.
+ */
+void sprite_kill(struct sprite *sprite);
+void sprite_group_clear(struct sprite_group *group);
+void sprite_group_kill(struct sprite_group *group);
+
+void sprite_group_rendersort_partial(struct sprite_group *group);
+
+#endif

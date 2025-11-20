@@ -47,7 +47,7 @@ int qc_scene_load(int mapid) {
   
   /* Drop any volatile state.
    */
-  //TODO sprites
+  sprite_group_kill(g.grpv+NS_sprgrp_keepalive);
   
   /* Prepare new state.
    */
@@ -55,8 +55,24 @@ int qc_scene_load(int mapid) {
   g.cellv=map.v;
   qc_bgbits_render();
   
-  //TODO load sprites
-  //TODO other scene-start concerns?
+  /* Run commands.
+   * Spawns sprites. Are there going to be other kinds of POI?
+   */
+  struct cmdlist_reader reader={.v=map.cmd,.c=map.cmdc};
+  struct cmdlist_entry cmd;
+  while (cmdlist_reader_next(&cmd,&reader)>0) {
+    switch (cmd.opcode) {
+    
+      case CMD_map_sprite: {
+          double x=cmd.arg[0]+0.5;
+          double y=cmd.arg[1]+0.5;
+          int rid=(cmd.arg[2]<<8)|cmd.arg[3];
+          uint32_t arg=(cmd.arg[4]<<24)|(cmd.arg[5]<<16)|(cmd.arg[6]<<8)|cmd.arg[7];
+          struct sprite *sprite=sprite_spawn(x,y,0,rid,arg,0,0);
+        } break;
+        
+    }
+  }
   
   return 0;
 }
@@ -66,8 +82,29 @@ int qc_scene_load(int mapid) {
  */
 
 void qc_scene_render() {
+
+  // Map. It's static so we do the real render just once when resetting the scene.
   graf_set_input(&g.graf,g.texid_bgbits);
   graf_decal(&g.graf,0,0,0,0,FBW,FBH);
-  //TODO sprites
+  
+  // Sprites.
+  graf_set_input(&g.graf,g.texid_sprites);
+  struct sprite_group *group=g.grpv+NS_sprgrp_render;
+  sprite_group_rendersort_partial(group);
+  struct sprite **p=group->sprv;
+  int i=group->sprc;
+  for (;i-->0;p++) {
+    struct sprite *sprite=*p;
+    if (sprite->type->render) {
+      int dstx=(int)(sprite->x*NS_sys_tilesize);
+      int dsty=(int)(sprite->y*NS_sys_tilesize);
+      sprite->type->render(sprite,dstx,dsty);
+    } else {
+      int dstx=(int)((sprite->x+sprite->w*0.5)*NS_sys_tilesize);
+      int dsty=(int)((sprite->y+sprite->h*0.5)*NS_sys_tilesize);
+      graf_tile(&g.graf,dstx,dsty,sprite->tileid,sprite->xform);
+    }
+  }
+
   //TODO overlay?
 }

@@ -28,6 +28,8 @@ int egg_client_init() {
 
   srand_auto();
   
+  g.grpv[NS_sprgrp_render].order=SPRITE_GROUP_ORDER_RENDER;
+  
   // We only have one song and it plays forever.
   egg_play_song(1,1,1,1.0f,0.0f);
   

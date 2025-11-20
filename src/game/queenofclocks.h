@@ -7,6 +7,7 @@
 #include "opt/res/res.h"
 #include "egg_res_toc.h"
 #include "shared_symbols.h"
+#include "sprite/sprite.h"
 
 #define FBW 320
 #define FBH 176
@@ -26,6 +27,7 @@ extern struct g {
   int texid_bgbits;
   int mapid;
   const uint8_t *cellv; // NS_sys_mapw*NS_sys_maph, never null except during init
+  struct sprite_group grpv[32];
 } g;
 
 // res.c
