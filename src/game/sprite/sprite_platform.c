@@ -12,6 +12,7 @@ struct sprite_platform {
   double animclock;
   int animframe;
   double turnclock;
+  int grabbed;
 };
 
 #define SPRITE ((struct sprite_platform*)sprite)
@@ -48,12 +49,26 @@ static int _platform_init(struct sprite *sprite) {
  */
  
 static void _platform_update(struct sprite *sprite,double elapsed) {
+
+  if (SPRITE->grabbed) return;
+  
+  double elapsed_pfr=elapsed;
+  switch (sprite->timescale) {
+    case 0: return;
+    case 1: elapsed*=0.500; break;
+    case 2: break;
+    case 3: elapsed*=2.000; break;
+    case 4: elapsed*=1000.0; break;
+  }
+
   if ((SPRITE->animclock-=elapsed)<=0.0) {
-    SPRITE->animclock+=0.150;
+    if ((SPRITE->animclock+=0.150)<=0.0) SPRITE->animclock=0.0; // Clamp at zero, otherwise Infinite Speed would accrue a debt.
     if (++(SPRITE->animframe)>=6) SPRITE->animframe=0;
   }
   if (SPRITE->turnclock>0.0) {
-    if ((SPRITE->turnclock-=elapsed)<=0.0) {
+    // Turnclock uses the Privileged Frame of Reference, ie real time.
+    // Otherwise things get pretty weird.
+    if ((SPRITE->turnclock-=elapsed_pfr)<=0.0) {
       // turnclock elapsed. Try the move again and turn around only if it fails again.
       if (!sprite_move(sprite,SPRITE->dx*SPEED*elapsed,SPRITE->dy*SPEED*elapsed)) {
         SPRITE->dx=-SPRITE->dx;
@@ -64,6 +79,29 @@ static void _platform_update(struct sprite *sprite,double elapsed) {
     if (!sprite_move(sprite,SPRITE->dx*SPEED*elapsed,0.0)) SPRITE->turnclock=TURN_TIME;
   } else if (SPRITE->idy) {
     if (!sprite_move(sprite,0.0,SPRITE->dy*SPEED*elapsed)) SPRITE->turnclock=TURN_TIME;
+  }
+}
+
+/* Get grabbed.
+ */
+ 
+static void _platform_grab(struct sprite *sprite,int grab,struct sprite *grabber,uint8_t dir) {
+  if (SPRITE->grabbed=grab) {
+    // If we're moving on the perpendicular axis, snap to the grabber's middle.
+    /*XXX or maybe not. This introduces a lot of uncertainty.
+    if (grabber) {
+      switch (dir) {
+        case DIR_W: case DIR_E: if (SPRITE->idy) {
+            double ny=grabber->y+grabber->h*0.5-sprite->h*0.5;
+            sprite_move(sprite,0.0,ny-sprite->y);
+          } break;
+        case DIR_N: case DIR_S: {
+            double nx=grabber->x+grabber->w*0.5-sprite->w*0.5;
+            sprite_move(sprite,nx-sprite->x,0.0);
+          } break;
+      }
+    }
+    /**/
   }
 }
 
@@ -110,4 +148,5 @@ const struct sprite_type sprite_type_platform={
   .init=_platform_init,
   .update=_platform_update,
   .render=_platform_render,
+  .grab=_platform_grab,
 };

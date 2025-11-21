@@ -11,6 +11,15 @@ void sprite_group_del(struct sprite_group *group) {
   if (group->sprv) free(group->sprv);
   free(group);
 }
+
+void sprite_group_cleanup(struct sprite_group *group) {
+  if (!group) return;
+  if (group->refc) return; // Mortal.
+  sprite_group_clear(group);
+  if (group->sprv) free(group->sprv);
+  group->sprv=0;
+  group->spra=0;
+}
  
 int sprite_group_ref(struct sprite_group *group) {
   if (!group) return -1;

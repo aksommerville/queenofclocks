@@ -104,6 +104,7 @@ int sprite_move(struct sprite *sprite,double dx,double dy) {
           if (dir==DIR_W) {
             nx=col+1.0;
             if (nx>=sprite->x) return 0;
+            fullx=nx;
             fullw=sprite->x+sprite->w-nx;
           } else {
             nx=col-sprite->w;
@@ -115,7 +116,7 @@ int sprite_move(struct sprite *sprite,double dx,double dy) {
       }
     } else { // Moving vertically, read one row at a time.
       int rowoob,row,drow;
-      if (dir==DIR_S) { row=rowz; rowoob=rowa-1; drow=-1; }
+      if (dir==DIR_N) { row=rowz; rowoob=rowa-1; drow=-1; }
       else { row=rowa; rowoob=rowz+1; drow=1; }
       for (;row!=rowoob;row+=drow) {
         if (sprite_collides_grid(sprite,cola,row,colc,1)) {
@@ -123,6 +124,7 @@ int sprite_move(struct sprite *sprite,double dx,double dy) {
           if (dir==DIR_N) {
             ny=row+1.0;
             if (ny>=sprite->y) return 0;
+            fully=ny;
             fullh=sprite->y+sprite->h-ny;
           } else {
             ny=row-sprite->h;

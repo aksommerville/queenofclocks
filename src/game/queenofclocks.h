@@ -12,6 +12,8 @@
 #define FBW 320
 #define FBH 176
 
+struct frect { double l,r,t,b; };
+
 extern struct g {
   void *rom;
   int romc;
@@ -30,6 +32,8 @@ extern struct g {
   const uint8_t *cellv; // NS_sys_mapw*NS_sys_maph, never null except during init
   struct sprite_group grpv[32];
   struct sprite_group grp_updscratch;
+  
+  struct sprite_group ctlpan_pumpkin;
 } g;
 
 void qc_sound(int rid,double x); // (x<0) if non-spatial, otherwise in 0..NS_sys_mapw and we pan accordingly
@@ -42,5 +46,12 @@ int qc_res_get(void *dstpp,int tid,int rid); // Not all resources are recorded.
 int qc_scene_load(int mapid);
 void qc_scene_update(double elapsed);
 void qc_scene_render();
+
+// ctlpan.c
+int ctlpan_begin(struct sprite *pumpkin);
+void ctlpan_dismiss();
+struct sprite *ctlpan_is_active(); // Fine to update, render, whatever, when we're dismissed. But call this if you actually need to know. Returns the pumpkin if active.
+void ctlpan_update(double elapsed);
+void ctlpan_render();
 
 #endif

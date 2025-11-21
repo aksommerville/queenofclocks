@@ -31,7 +31,7 @@ T 2025-11-25 Jam ends at 11:00.
 - [ ] Timed flamethrowers.
 - [ ] Other moving hazards. Chainsaw on wheels, etc.
 - [ ] Conveyor belts.
-- [ ] Wand.
+- [x] Wand.
 - [ ] Goal and advancement.
 - [x] Music. I think just one song.
 - [ ] Sound effects.

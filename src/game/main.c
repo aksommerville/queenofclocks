@@ -57,12 +57,15 @@ void egg_client_update(double elapsed) {
   }
 
   qc_scene_update(elapsed);
+  
+  ctlpan_update(elapsed);
 }
 
 
 void egg_client_render() {
   graf_reset(&g.graf);
   qc_scene_render();
+  ctlpan_render();
   graf_flush(&g.graf);
 }
 

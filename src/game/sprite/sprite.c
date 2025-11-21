@@ -43,6 +43,7 @@ struct sprite *sprite_new(double x,double y,const struct sprite_type *type,int r
   sprite->arg=arg;
   sprite->cmd=cmd;
   sprite->cmdc=cmdc;
+  sprite->timescale=2;
   
   // Join keepalive, all sprites must.
   if (sprite_group_add(g.grpv+NS_sprgrp_keepalive,sprite)<0) {

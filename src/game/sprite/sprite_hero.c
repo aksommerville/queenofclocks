@@ -25,6 +25,7 @@ struct sprite_hero {
  */
  
 static void _hero_del(struct sprite *sprite) {
+  ctlpan_dismiss(); // Just to be safe.
 }
 
 /* Init.
@@ -131,6 +132,111 @@ static void hero_update_gravity(struct sprite *sprite,int jumpreq,double elapsed
   }
 }
 
+/* Scan bounds for wand.
+ */
+ 
+static void hero_get_wand_bounds(struct frect *dst,const struct sprite *sprite) {
+  switch (SPRITE->wanddir) {
+    case -1: {
+        dst->l=sprite->x;
+        dst->r=sprite->x+sprite->w;
+        dst->t=0.0; // TODO limit per grid
+        dst->b=sprite->y;
+      } break;
+    case 1: {
+        dst->l=sprite->x;
+        dst->r=sprite->x+sprite->w;
+        dst->t=sprite->y+sprite->h;
+        dst->b=NS_sys_maph; // TODO limit per grid
+      } break;
+    default: if (sprite->xform&EGG_XFORM_XREV) {
+        dst->l=0.0; // TODO limit per grid
+        dst->r=sprite->x;
+        dst->t=sprite->y;
+        dst->b=sprite->y+sprite->h;
+      } else {
+        dst->l=sprite->x+sprite->w;
+        dst->r=NS_sys_mapw; // TODO limit per grid
+        dst->t=sprite->y;
+        dst->b=sprite->y+sprite->h;
+      }
+  }
+}
+
+/* Compare two candidate pumpkins.
+ * Both are already known to be in bounds.
+ * (but either may be null).
+ * Return <0 if (a) is nearer or >0 if (b).
+ */
+ 
+static int hero_pumpkincmp(const struct sprite *sprite,const struct sprite *a,const struct sprite *b) {
+  if (!a) return 1;
+  if (!b) return -1;
+  switch (SPRITE->wanddir) {
+    case -1: {
+        double aq=a->y+a->h,bq=b->y+b->h;
+        if (aq>bq) return -1;
+        if (aq<bq) return 1;
+      } break;
+    case 1: {
+        if (a->y<b->y) return -1;
+        if (a->y>b->y) return 1;
+      } break;
+    default: if (sprite->xform&EGG_XFORM_XREV) {
+        double aq=a->x+a->w,bq=b->x+b->w;
+        if (aq>bq) return -1;
+        if (aq<bq) return 1;
+      } else {
+        if (a->x<b->x) return -1;
+        if (a->x>b->x) return 1;
+      }
+  }
+  return 0;
+}
+
+/* Generic cardinal direction bit from my wand direction.
+ */
+ 
+static uint8_t hero_dir_from_wanddir(const struct sprite *sprite) {
+  switch (SPRITE->wanddir) {
+    case -1: return DIR_N;
+    case 1: return DIR_S;
+    default: return (sprite->xform&EGG_XFORM_XREV)?DIR_W:DIR_E;
+  }
+}
+
+/* Update wand, in progress.
+ */
+ 
+static void hero_update_wand_active(struct sprite *sprite,double elapsed) {
+
+  // If we have some sprite locked, do something. TODO what?
+  struct sprite *pumpkin=ctlpan_is_active();
+  if (pumpkin) {
+    return;
+  }
+  
+  // Find a sprite to lock on.
+  struct frect bounds;
+  hero_get_wand_bounds(&bounds,sprite);
+  struct sprite **otherp=g.grpv[NS_sprgrp_motion].sprv;
+  int otheri=g.grpv[NS_sprgrp_motion].sprc;
+  for (;otheri-->0;otherp++) {
+    struct sprite *other=*otherp;
+    if (!other->type->grab) continue; // Shouldn't be in motion group.
+    if (other->x>=bounds.r) continue;
+    if (other->y>=bounds.b) continue;
+    if (other->x+other->w<=bounds.l) continue;
+    if (other->y+other->h<=bounds.t) continue;
+    if (hero_pumpkincmp(sprite,other,pumpkin)<0) pumpkin=other;
+  }
+  if (!pumpkin) return;
+  
+  // Initiate grabbenation.
+  if (ctlpan_begin(pumpkin)<0) return;
+  pumpkin->type->grab(pumpkin,1,sprite,hero_dir_from_wanddir(sprite));
+}
+
 /* Update the wand.
  * Called every frame, with the state of the actuator button.
  */
@@ -140,9 +246,12 @@ static void hero_update_wand(struct sprite *sprite,int pressed,double elapsed) {
   // No wand in midair.
   if (SPRITE->falling) pressed=0;
   
-  if (pressed==SPRITE->wanding) return;
+  if (pressed==SPRITE->wanding) {
+    if (pressed) hero_update_wand_active(sprite,elapsed);
+    return;
+  }
   SPRITE->wanding=pressed;
-  
+
   // When we first enter the wand state, commit to a direction.
   if (SPRITE->wanding) {
     switch (g.input&(EGG_BTN_UP|EGG_BTN_DOWN)) {
@@ -150,9 +259,16 @@ static void hero_update_wand(struct sprite *sprite,int pressed,double elapsed) {
       case EGG_BTN_DOWN: SPRITE->wanddir=1; break;
       default: SPRITE->wanddir=0; break;
     }
-  }
+    hero_update_wand_active(sprite,elapsed);
   
-  //TODO Apply wand activity. How does this work?
+  // Release wand, might need to notify the pumpkin.
+  } else {
+    struct sprite *pumpkin=ctlpan_is_active();
+    if (pumpkin) {
+      pumpkin->type->grab(pumpkin,0,sprite,hero_dir_from_wanddir(sprite));
+      ctlpan_dismiss();
+    }
+  }
 }
 
 /* Update.

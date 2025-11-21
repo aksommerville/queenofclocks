@@ -20,6 +20,7 @@ struct sprite {
   int rid;
   const void *cmd; // From resource.
   int cmdc;
+  int timescale; // 0,1,2,3,4 = stop,slow,normal,fast,infinite. ctlpan may change it behind your back.
 };
 
 struct sprite_type {
@@ -37,6 +38,14 @@ struct sprite_type {
    * Sprites may assume that (g.texid_sprites) is active in (g.graf). If you set it otherwise, put it back before returning.
    */
   void (*render)(struct sprite *sprite,int dstx,int dsty);
+  
+  /* Notify of beginning or end of wand inspection.
+   * (grab) nonzero if we're starting the grab, zero if releasing.
+   * (grabber) is the hero.
+   * (dir) is a cardinal direction bit, which direction is the grabber facing.
+   * Everything in motion group must implement this.
+   */
+  void (*grab)(struct sprite *sprite,int grab,struct sprite *grabber,uint8_t dir);
 };
 
 struct sprite_group {
@@ -85,7 +94,8 @@ const struct sprite_type *sprite_type_from_commands(const void *v,int c);
 /* Sprite group.
  *************************************************************************/
  
-void sprite_group_del(struct sprite_group *group);
+void sprite_group_del(struct sprite_group *group); // No effect on immortals.
+void sprite_group_cleanup(struct sprite_group *group); // Immortals only.
 struct sprite_group *sprite_group_new();
 int sprite_group_ref(struct sprite_group *group);
 
