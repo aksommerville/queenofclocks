@@ -25,8 +25,8 @@ T 2025-11-25 Jam ends at 11:00.
 - [ ] One-way platforms? I didn't account for these in physics. Do we want?
 - [ ] Wall hugging?
 - [ ] Wall jump?
-- [ ] Moving platforms.
-- - [ ] How to communicate with the hero? It's important that riding platforms operate smoothly.
+- [x] Moving platforms.
+- - [x] How to communicate with the hero? It's important that riding platforms operate smoothly.
 - [ ] Pushable blocks. (are we doing that?)
 - [ ] Timed flamethrowers.
 - [ ] Other moving hazards. Chainsaw on wheels, etc.

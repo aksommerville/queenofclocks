@@ -143,11 +143,19 @@ int sprite_move(struct sprite *sprite,double dx,double dy) {
   int otheri=g.grpv[NS_sprgrp_physics].sprc;
   for (;otheri-->0;otherp++) {
     struct sprite *other=*otherp;
+    
+    // First the basic culling.
     if (other==sprite) continue; // This collision is ok ;)
     if (other->x>=fullr) continue;
-    if (other->y<=fullb) continue;
+    if (other->y>=fullb) continue;
     if (other->x+other->w<=fullx) continue;
     if (other->y+other->h<=fully) continue;
+    
+    // If we are carrful and moving up, try moving the other first.
+    if (sprite->type->carrful&&(dir==DIR_N)&&0) {
+      if (sprite_move(other,0.0,dy)) continue;
+    }
+    
     // Collision against solid sprite.
     switch (dir) {
       case DIR_W: {
@@ -163,6 +171,8 @@ int sprite_move(struct sprite *sprite,double dx,double dy) {
           fullr=fullx+fullw;
         } break;
       case DIR_N: {
+          // If we are carrful, try pushing the other guy first. And then react as usual.
+          if (sprite->type->carrful) sprite_move(other,0.0,dy);
           ny=other->y+other->h;
           if (ny>=sprite->y) return 0;
           fullh=sprite->y+sprite->h-ny;
@@ -178,7 +188,24 @@ int sprite_move(struct sprite *sprite,double dx,double dy) {
   }
   
   // OK let's keep it.
+  dx=nx-sprite->x; // Freshen (dx,dy) in case we're partial and carrful.
+  dy=ny-sprite->y;
+  double oy=sprite->y; // Need for detecting pumpkins.
   sprite->x=nx;
   sprite->y=ny;
+  
+  // If we are carrful and moving anything but up, look for sprites aligned with our top edge and apply the same move to them.
+  // The up case is handled differently, under sprite collisions, because we do want to collide normally sometimes when up.
+  if (sprite->type->carrful&&(dir!=DIR_N)) {
+    for (otherp=g.grpv[NS_sprgrp_physics].sprv,otheri=g.grpv[NS_sprgrp_physics].sprc;otheri-->0;otherp++) {
+      struct sprite *other=*otherp;
+      double e=other->y+other->h-oy;
+      if ((e<-SMALL)||(e>SMALL)) continue;
+      if (other->x+other->w<=fullx) continue;
+      if (other->x>=fullx+fullw) continue;
+      sprite_move(other,dx,dy);
+    }
+  }
+
   return 1;
 }

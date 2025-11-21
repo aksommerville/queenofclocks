@@ -25,6 +25,9 @@ struct sprite {
 struct sprite_type {
   const char *name;
   int objlen;
+  
+  int carrful; // Hint to physics that a physical sprite resting on my head should move with me if possible.
+  
   void (*del)(struct sprite *sprite);
   int (*init)(struct sprite *sprite);
   void (*update)(struct sprite *sprite,double elapsed);

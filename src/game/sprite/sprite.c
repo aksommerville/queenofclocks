@@ -79,6 +79,8 @@ struct sprite *sprite_new(double x,double y,const struct sprite_type *type,int r
           }
         }
       }
+    } else { // Omitting grpmask is not technically an error, but realistically it must always be set.
+      fprintf(stderr,"sprite:%d did not set grpmask\n",rid);
     }
   }
   

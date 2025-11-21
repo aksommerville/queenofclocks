@@ -31,9 +31,11 @@
 // Should match everything after 'spriteid' in the CMD_map_sprite args.
 #define NS_sprtype_dummy 0 /* (u32)0 */
 #define NS_sprtype_hero 1 /* (u32)0 */
+#define NS_sprtype_platform 3 /* (u8)dx (u8)dy (u8)w (u8)0 */
 #define FOR_EACH_SPRTYPE \
   _(dummy) \
-  _(hero)
+  _(hero) \
+  _(platform)
   
 #define NS_sprgrp_keepalive 0 /* Programmatic access only. */
 #define NS_sprgrp_deathrow  1 /* Programmatic access only. */

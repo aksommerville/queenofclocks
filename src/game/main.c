@@ -50,6 +50,11 @@ void egg_client_update(double elapsed) {
     egg_terminate(0);
     return;
   }
+  
+  //XXX TEMP: AUX1 to restart, for when I get trapped.
+  if ((g.input&EGG_BTN_AUX1)&&!(g.pvinput&EGG_BTN_AUX1)) {
+    qc_scene_load(g.mapid);
+  }
 
   qc_scene_update(elapsed);
 }

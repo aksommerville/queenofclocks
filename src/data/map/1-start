@@ -23,3 +23,6 @@
 
 image image:terrain
 sprite @11,15 sprite:hero (u32)0
+sprite @3,19 sprite:platform (u8)0 (u8)255 (u8)3 (u8)0
+sprite @18,13 sprite:platform (u8)1 (u8)0 (u8)2 (u8)0
+sprite @2,10 sprite:platform (u8)0 (u8)1 (u8)1 (u8)0
