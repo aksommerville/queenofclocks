@@ -204,6 +204,10 @@ int sprite_move(struct sprite *sprite,double dx,double dy) {
       if (other->x+other->w<=fullx) continue;
       if (other->x>=fullx+fullw) continue;
       sprite_move(other,dx,dy);
+      // There's a little snafu here. Ride a platform and you and the platform change to the next pixel at different times, so you jitter relative to each other.
+      // We might be able to mitigate it by fudging the rider's position at the moment they make contact.
+      // But we don't have a strong sense of when that contact first occurs.
+      // I tried mitigating it ongoingly, right here, and that was a disaster.
     }
   }
 

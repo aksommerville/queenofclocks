@@ -16,6 +16,7 @@
 #define CMD_sprite_image    0x20 /* u16:imageid ; Always image:sprites for us. */
 #define CMD_sprite_tile     0x21 /* u8:tileid, u8:xform */
 #define CMD_sprite_type     0x22 /* u16:sprtype */
+#define CMD_sprite_layer    0x23 /* u16:layer ; default 256 */
 #define CMD_sprite_groups   0x40 /* b32:sprgrp */
 #define CMD_sprite_size     0x41 /* u8.8:width, u8.8:height ; both in meters */
 

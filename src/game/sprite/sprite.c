@@ -63,6 +63,7 @@ struct sprite *sprite_new(double x,double y,const struct sprite_type *type,int r
     while (cmdlist_reader_next(&cmd,&reader)>0) {
       switch (cmd.opcode) {
         case CMD_sprite_tile: sprite->tileid=cmd.arg[0]; sprite->xform=cmd.arg[1]; break;
+        case CMD_sprite_layer: sprite->layer=(cmd.arg[0]<<8)|cmd.arg[1]; break;
         case CMD_sprite_groups: grpmask=(cmd.arg[0]<<24)|(cmd.arg[1]<<16)|(cmd.arg[2]<<8)|cmd.arg[3]; break;
         case CMD_sprite_size: sprite->w=cmd.arg[0]+cmd.arg[1]/256.0; sprite->h=cmd.arg[2]+cmd.arg[3]/256.0; break;
       }

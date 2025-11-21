@@ -2,3 +2,4 @@ type (u16:sprtype)platform
 image image:sprites
 tile 64 0
 groups (b32:sprgrp)render,update,physics,motion
+layer (u16)255
