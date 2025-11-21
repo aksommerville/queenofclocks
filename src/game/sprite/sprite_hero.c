@@ -1,9 +1,22 @@
 #include "game/queenofclocks.h"
 
+#define WALK_SPEED 10.0 /* m/s. Factors of 60 are less jumpy. */
+#define JUMP_INITIAL -22.0 /* m/s */
+#define JUMP_ACCEL    40.0 /* m/s**2. With these constants, she can jump five meters, not six. */
+#define GRAVITY_ACCEL 30.0 /* m/s**2 */
+#define GRAVITY_LIMIT 25.0 /* m/s */
+#define GRAVITY_SOUND_THRESHOLD 10.0 /* m/s. With the above constants, a 1m fall is 8ish, and a 2m fall 11ish. Terminal velocity around 11m */
+
 struct sprite_hero {
   struct sprite hdr;
   double animclock;
   int animframe;
+  int falling; // -1,0,1 = jump,seated,fall
+  int wanding; // 0,1
+  int wanddir; // -1,0,1 = up,horz,down
+  int walking; // -1,0,1
+  int seated;
+  double gravity; // Jump or fall power.
 };
 
 #define SPRITE ((struct sprite_hero*)sprite)
@@ -21,18 +34,143 @@ static int _hero_init(struct sprite *sprite) {
 
   // Generic ctor centers on the center of the tile that spawned us. We want to align our foot with its bottom.
   sprite->y-=0.5;
+  
+  // Optimistically assume that we spawn on solid ground. Should always be the case.
+  SPRITE->falling=0;
 
   return 0;
+}
+
+/* Update walking.
+ * This is called every frame, with the current dpad state, whether walking or not.
+ */
+ 
+static void hero_update_walk(struct sprite *sprite,int dx,double elapsed) {
+  
+  // No walking while wanding.
+  if (SPRITE->wanding) dx=0;
+  
+  // Is it a change of state?
+  if (dx!=SPRITE->walking) {
+    SPRITE->walking=dx;
+    if (dx>0) sprite->xform=0;
+    else if (dx<0) sprite->xform=EGG_XFORM_XREV;
+  }
+  
+  // If nonzero, apply motion and animation.
+  if (SPRITE->walking) {
+    sprite_move(sprite,WALK_SPEED*elapsed*SPRITE->walking,0.0);
+    
+    if ((SPRITE->animclock-=elapsed)<=0.0) {
+      SPRITE->animclock+=0.200;
+      if (++(SPRITE->animframe)>=4) SPRITE->animframe=0;
+    }
+  } else {
+    SPRITE->animclock=0.0;
+    SPRITE->animframe=0;
+  }
+}
+
+/* Update gravity or jump.
+ * Called every frame, with the state of the jump button.
+ */
+ 
+static void hero_update_gravity(struct sprite *sprite,int jumpreq,double elapsed) {
+
+  // If a jump begins or continues, do it and return.
+  if (jumpreq) {
+    if (SPRITE->falling<0) {
+      // Ongoing jump.
+      SPRITE->gravity+=JUMP_ACCEL*elapsed;
+      if (SPRITE->gravity>=0.0) {
+        // Jump limit.
+        SPRITE->falling=1;
+      } else {
+        double dy=SPRITE->gravity*elapsed;
+        if (!sprite_move(sprite,0.0,dy)) {
+          // Head bonk. Wanna use it?
+        }
+      }
+      return;
+    } else if ((SPRITE->falling==0)&&!(g.pvinput&EGG_BTN_SOUTH)) {
+      if (g.input&EGG_BTN_DOWN) {
+        // Begin downjump.
+        //TODO Downjump. Are oneways going to be a thing?
+        return;
+      } else {
+        // Begin regular jump.
+        qc_sound(RID_sound_jump,sprite->x);
+        SPRITE->falling=-1;
+        SPRITE->gravity=JUMP_INITIAL;
+        return;
+      }
+    }
+    
+  // Released jump but gravity still negative? Zero it before proceeding.
+  } else if (SPRITE->gravity<0.0) {
+    SPRITE->gravity=0.0;
+  }
+  
+  
+  // Try to move down. If it fails completely, we are seated.
+  SPRITE->gravity+=GRAVITY_ACCEL*elapsed;
+  if (SPRITE->gravity>=GRAVITY_LIMIT) SPRITE->gravity=GRAVITY_LIMIT;
+  double dy=SPRITE->gravity*elapsed;
+  if (sprite_move(sprite,0.0,dy)) {
+    if (SPRITE->falling<1) {
+      // Begin fall.
+      SPRITE->falling=1;
+    }
+  } else if (SPRITE->falling) {
+    // End fall.
+    if (SPRITE->gravity>GRAVITY_SOUND_THRESHOLD) qc_sound(RID_sound_land,sprite->x);
+    SPRITE->falling=0;
+    SPRITE->gravity=0.0;
+  } else {
+    SPRITE->gravity=0.0;
+  }
+}
+
+/* Update the wand.
+ * Called every frame, with the state of the actuator button.
+ */
+ 
+static void hero_update_wand(struct sprite *sprite,int pressed,double elapsed) {
+
+  // No wand in midair.
+  if (SPRITE->falling) pressed=0;
+  
+  if (pressed==SPRITE->wanding) return;
+  SPRITE->wanding=pressed;
+  
+  // When we first enter the wand state, commit to a direction.
+  if (SPRITE->wanding) {
+    switch (g.input&(EGG_BTN_UP|EGG_BTN_DOWN)) {
+      case EGG_BTN_UP: SPRITE->wanddir=-1; break;
+      case EGG_BTN_DOWN: SPRITE->wanddir=1; break;
+      default: SPRITE->wanddir=0; break;
+    }
+  }
+  
+  //TODO Apply wand activity. How does this work?
 }
 
 /* Update.
  */
  
 static void _hero_update(struct sprite *sprite,double elapsed) {
-  if ((SPRITE->animclock-=elapsed)<=0.0) {
-    SPRITE->animclock+=0.500;
-    if (++(SPRITE->animframe)>=4) SPRITE->animframe=0;
+  
+  switch (g.input&(EGG_BTN_LEFT|EGG_BTN_RIGHT)) {
+    case EGG_BTN_LEFT: hero_update_walk(sprite,-1,elapsed); break;
+    case EGG_BTN_RIGHT: hero_update_walk(sprite,1,elapsed); break;
+    default: hero_update_walk(sprite,0,elapsed); break;
   }
+  
+  if (g.input&EGG_BTN_WEST) hero_update_wand(sprite,1,elapsed);
+  else hero_update_wand(sprite,0,elapsed);
+  
+  if (g.input&EGG_BTN_SOUTH) hero_update_gravity(sprite,1,elapsed);
+  else hero_update_gravity(sprite,0,elapsed);
 }
 
 /* Render.
@@ -45,11 +183,29 @@ static void _hero_render(struct sprite *sprite,int dstx,int dsty) {
   uint8_t tileid=sprite->tileid;
   uint8_t xform=sprite->xform;
   #define ADDL(dx,dy,tid) graf_tile(&g.graf,bodyx+(xform?-(dx):(dx))*NS_sys_tilesize,bodyy+(dy)*NS_sys_tilesize,tid,xform);
-  switch (SPRITE->animframe) {
-    case 0: tileid=0x10; break;
-    case 1: tileid=0x15; ADDL(1,0,0x16) break;
-    case 2: tileid=0x27; ADDL(0,-2,0x07) break;
-    case 3: tileid=0x18; ADDL(0,1,0x28) break;
+  
+  // Wand takes precedence.
+  if (SPRITE->wanding) {
+    switch (SPRITE->wanddir) {
+      case -1: tileid=0x27; ADDL(0,-2,0x07) break;
+      case 0: tileid=0x15; ADDL(1,0,0x16) break;
+      case 1: tileid=0x18; ADDL(0,1,0x28) break;
+    }
+    
+  // Jumping and falling are each single frames.
+  } else if (SPRITE->falling<0) {
+    tileid=0x13;
+  } else if (SPRITE->falling>0) {
+    tileid=0x14;
+  
+  // Walking, apply the animation frame.
+  } else if (SPRITE->walking) {
+    switch (SPRITE->animframe) {
+      case 1: tileid+=1; break;
+      case 3: tileid+=2; break;
+    }
+    
+  // Anything else, we're idle and the defaults are correct.
   }
   graf_tile(&g.graf,bodyx,bodyy-NS_sys_tilesize,tileid-0x10,xform);
   graf_tile(&g.graf,bodyx,bodyy,tileid,xform);

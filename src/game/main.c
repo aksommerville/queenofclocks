@@ -43,6 +43,14 @@ int egg_client_init() {
  *********************************************************************/
 
 void egg_client_update(double elapsed) {
+
+  g.pvinput=g.input;
+  g.input=egg_input_get_one(0);
+  if ((g.input&EGG_BTN_AUX3)&&!(g.pvinput&EGG_BTN_AUX3)) {
+    egg_terminate(0);
+    return;
+  }
+
   qc_scene_update(elapsed);
 }
 
@@ -51,4 +59,16 @@ void egg_client_render() {
   graf_reset(&g.graf);
   qc_scene_render();
   graf_flush(&g.graf);
+}
+
+/* Audio events.
+ */
+
+void qc_sound(int rid,double x) {
+  //TODO Will we need a limiter?
+  double pan=0.0;
+  if (x>=0.0) {
+    pan=(x*2.0)/NS_sys_mapw-1.0;
+  }
+  egg_play_sound(rid,1.0,pan);
 }

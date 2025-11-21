@@ -107,4 +107,38 @@ void sprite_group_rendersort_partial(struct sprite_group *group);
  */
 int sprite_group_copy(struct sprite_group *dst,struct sprite_group *src);
 
+/* Physics.
+ * We'll use an on-demand physics model.
+ * When a participating sprite wants to move, it should call sprite_move(), one axis at a time.
+ * All interactions are applied immediately during that call.
+ *********************************************************************/
+
+/* Move a sprite by (dx,dy) meters, applying physics.
+ * We assume that (sprite) is a member of physics group, and we don't check.
+ * Physics for real happens one-dimensionally. If both (dx,dy) are nonzero, we apply (dx) first, then (dy).
+ * You will never move backward with respect to the requested vector, on either axis.
+ * Returns nonzero if moved, or zero if fully blocked.
+ * Partial moves are not distinguishable from full ones.
+ */
+int sprite_move(struct sprite *sprite,double dx,double dy);
+
+/* Nonzero if any cell in (x,y,w,h) is solid, by (sprite)'s reckoning.
+ * We don't care whether (x,y,w,h) overlaps (sprite)'s bounds.
+ */
+int sprite_collides_grid(const struct sprite *sprite,int x,int y,int w,int h);
+
+/* vector_from_dir() only returns -1,0,1. Diagonals are not normal; they're sqrt(2) longer than cardinals.
+ */
+#define DIR_NW  0x80
+#define DIR_N   0x40
+#define DIR_NE  0x20
+#define DIR_W   0x10
+#define DIR_MID 0x00
+#define DIR_E   0x08
+#define DIR_SW  0x04
+#define DIR_S   0x02
+#define DIR_SE  0x01
+uint8_t dir_from_vector(double dx,double dy);
+void vector_from_dir(double *dx,double *dy,uint8_t dir);
+
 #endif

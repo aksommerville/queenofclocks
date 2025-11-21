@@ -18,6 +18,7 @@ extern struct g {
   struct graf graf;
   struct rom_entry *resv;
   int resc,resa;
+  int input,pvinput;
   
   // We'll use just two tilesheets. Load them in advance, globally.
   int texid_terrain;
@@ -30,6 +31,8 @@ extern struct g {
   struct sprite_group grpv[32];
   struct sprite_group grp_updscratch;
 } g;
+
+void qc_sound(int rid,double x); // (x<0) if non-spatial, otherwise in 0..NS_sys_mapw and we pan accordingly
 
 // res.c
 int qc_res_init();
