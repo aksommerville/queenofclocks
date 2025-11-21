@@ -2,6 +2,8 @@
 
 struct sprite_hero {
   struct sprite hdr;
+  double animclock;
+  int animframe;
 };
 
 #define SPRITE ((struct sprite_hero*)sprite)
@@ -27,6 +29,10 @@ static int _hero_init(struct sprite *sprite) {
  */
  
 static void _hero_update(struct sprite *sprite,double elapsed) {
+  if ((SPRITE->animclock-=elapsed)<=0.0) {
+    SPRITE->animclock+=0.500;
+    if (++(SPRITE->animframe)>=4) SPRITE->animframe=0;
+  }
 }
 
 /* Render.
@@ -34,8 +40,15 @@ static void _hero_update(struct sprite *sprite,double elapsed) {
  
 static void _hero_render(struct sprite *sprite,int dstx,int dsty) {
   const int ht=NS_sys_tilesize>>1;
-  graf_tile(&g.graf,dstx+ht,dsty+ht,sprite->tileid-0x10,sprite->xform);
-  graf_tile(&g.graf,dstx+ht,dsty+ht+NS_sys_tilesize,sprite->tileid,sprite->xform);
+  int col=0;
+  switch (SPRITE->animframe) {
+    case 0: col+=0; break;
+    case 1: col+=0; break;
+    case 2: col+=3; break;
+    case 3: col+=4; break;
+  }
+  graf_tile(&g.graf,dstx+ht,dsty+ht,sprite->tileid+col-0x10,sprite->xform);
+  graf_tile(&g.graf,dstx+ht,dsty+ht+NS_sys_tilesize,sprite->tileid+col,sprite->xform);
 }
 
 /* Type definition.

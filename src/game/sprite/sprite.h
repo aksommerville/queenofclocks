@@ -103,4 +103,8 @@ void sprite_group_kill(struct sprite_group *group);
 
 void sprite_group_rendersort_partial(struct sprite_group *group);
 
+/* Drop all sprites in (dst), then add all from (src).
+ */
+int sprite_group_copy(struct sprite_group *dst,struct sprite_group *src);
+
 #endif

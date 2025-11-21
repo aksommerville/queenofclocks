@@ -38,15 +38,14 @@ int egg_client_init() {
   return 0;
 }
 
-/* Update.
+/* Update and render basically just defer to the scene.
+ * I'm trying not to implement a modal stack for this one.
  *********************************************************************/
 
 void egg_client_update(double elapsed) {
-  //TODO
+  qc_scene_update(elapsed);
 }
 
-/* Render.
- ****************************************************************************/
 
 void egg_client_render() {
   graf_reset(&g.graf);

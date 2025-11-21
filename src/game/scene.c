@@ -77,6 +77,31 @@ int qc_scene_load(int mapid) {
   return 0;
 }
 
+/* Update.
+ */
+ 
+void qc_scene_update(double elapsed) {
+
+  /* Update the sprites.
+   * We'll make a copy of the update group every frame, and operate off that.
+   * Sprites added or removed to the update group during this cycle will not take effect until the next cycle.
+   */
+  if (sprite_group_copy(&g.grp_updscratch,g.grpv+NS_sprgrp_update)<0) return;
+  struct sprite **p=g.grp_updscratch.sprv;
+  int i=g.grp_updscratch.sprc;
+  for (;i-->0;p++) {
+    struct sprite *sprite=*p;
+    if (!sprite->type->update) continue; // what is it doing in the update group?
+    sprite->type->update(sprite,elapsed);
+  }
+  sprite_group_clear(&g.grp_updscratch);
+  
+  // Execute all of deathrow.
+  sprite_group_kill(g.grpv+NS_sprgrp_deathrow);
+  
+  //TODO Transitions, termination, etc.
+}
+
 /* Render scene.
  * Complete overwrites framebuffer.
  */

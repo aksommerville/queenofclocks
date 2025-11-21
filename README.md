@@ -19,7 +19,7 @@ T 2025-11-25 Jam ends at 11:00.
 
 ## TODO
 
-- [ ] I think the current graphics are too fussy. Don't use an outline. Try a black sky and light walls (unoutlined sprites would read great against black).
+- [x] I think the current graphics are too fussy. Don't use an outline. Try a black sky and light walls (unoutlined sprites would read great against black).
 - [ ] Hero motion.
 - [ ] Physics. Generalize. We'll need a strong concept of seating, there's going to be lots of moving platforms.
 - [ ] Moving platforms.
@@ -29,5 +29,5 @@ T 2025-11-25 Jam ends at 11:00.
 - [ ] Conveyor belts.
 - [ ] Wand.
 - [ ] Goal and advancement.
-- [ ] Music. I think just one song.
+- [x] Music. I think just one song.
 - [ ] Sound effects.

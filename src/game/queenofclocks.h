@@ -28,6 +28,7 @@ extern struct g {
   int mapid;
   const uint8_t *cellv; // NS_sys_mapw*NS_sys_maph, never null except during init
   struct sprite_group grpv[32];
+  struct sprite_group grp_updscratch;
 } g;
 
 // res.c
@@ -36,6 +37,7 @@ int qc_res_get(void *dstpp,int tid,int rid); // Not all resources are recorded.
 
 // scene.c
 int qc_scene_load(int mapid);
+void qc_scene_update(double elapsed);
 void qc_scene_render();
 
 #endif

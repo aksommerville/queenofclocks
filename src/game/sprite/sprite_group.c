@@ -273,3 +273,33 @@ void sprite_group_rendersort_partial(struct sprite_group *group) {
     }
   }
 }
+
+/* Copy one group to another.
+ */
+ 
+int sprite_group_copy(struct sprite_group *dst,struct sprite_group *src) {
+  if (!dst||!src) return -1;
+  if (dst->sprc) sprite_group_clear(dst);
+  if (!src->sprc) return 0;
+  if (dst->spra<src->sprc) {
+    int na=src->sprc;
+    if (na<INT_MAX-32) na+=32;
+    if (na>INT_MAX/sizeof(void*)) return -1;
+    void *nv=realloc(dst->sprv,sizeof(void*)*na);
+    if (!nv) return -1;
+    dst->sprv=nv;
+    dst->spra=na;
+  }
+  // Retain all the sprites in (src). If one fails, ay yi yi, back it out.
+  int i=0;
+  for (;i<src->sprc;i++) {
+    if (sprite_ref(src->sprv[i])<0) {
+      while (i-->0) sprite_del(src->sprv[i]);
+      return -1;
+    }
+  }
+  // And then just memcpy them over.
+  memcpy(dst->sprv,src->sprv,sizeof(void*)*src->sprc);
+  dst->sprc=src->sprc;
+  return 0;
+}
