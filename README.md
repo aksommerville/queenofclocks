@@ -23,7 +23,7 @@ T 2025-11-25 Jam ends at 11:00.
 - [x] Hero motion.
 - [x] Physics. Generalize. We'll need a strong concept of seating, there's going to be lots of moving platforms.
 - [x] Static hazards, death.
-- [ ] Allow to change wand direction if no pumpkin captured yet.
+- [x] Allow to change wand direction if no pumpkin captured yet.
 - [ ] One-way platforms? I didn't account for these in physics. Do we want?
 - [ ] Wall hugging?
 - [ ] Wall jump?
@@ -36,6 +36,7 @@ T 2025-11-25 Jam ends at 11:00.
 - [x] Soulballs.
 - [ ] Password-entry puzzle where there are changing digits you can adjust.
 - [ ] Real maps. 10..15 should be good.
+- [ ] Don't wand thru walls. Or do. Or a fixed distance limit. Does it matter?
 - [x] Wand.
 - [x] Goal and advancement.
 - [x] Music. I think just one song.

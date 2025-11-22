@@ -261,7 +261,19 @@ static void hero_update_wand_active(struct sprite *sprite,double elapsed) {
     if (other->y+other->h<=bounds.t) continue;
     if (hero_pumpkincmp(sprite,other,pumpkin)<0) pumpkin=other;
   }
-  if (!pumpkin) return;
+  
+  // If we're still unattached, allow changing direction.
+  if (!pumpkin) {
+    switch (g.input&(EGG_BTN_UP|EGG_BTN_DOWN)) {
+      case EGG_BTN_UP: SPRITE->wanddir=-1; break;
+      case EGG_BTN_DOWN: SPRITE->wanddir=1; break;
+      default: SPRITE->wanddir=0; switch (g.input&(EGG_BTN_LEFT|EGG_BTN_RIGHT)) {
+          case EGG_BTN_LEFT: sprite->xform=EGG_XFORM_XREV; break;
+          case EGG_BTN_RIGHT: sprite->xform=0; break;
+        } break;
+    }
+    return;
+  }
   
   // Initiate grabbenation.
   if (ctlpan_begin(pumpkin)<0) return;
