@@ -15,7 +15,6 @@ struct sprite_hero {
   int wanding; // 0,1
   int wanddir; // -1,0,1 = up,horz,down
   int walking; // -1,0,1
-  int seated;
   double gravity; // Jump or fall power.
 };
 
@@ -40,6 +39,26 @@ static int _hero_init(struct sprite *sprite) {
   SPRITE->falling=0;
 
   return 0;
+}
+
+/* Check victory conditions.
+ */
+ 
+int sprite_hero_in_victory_position(const struct sprite *sprite) {
+  if (!sprite||(sprite->type!=&sprite_type_hero)) return 0;
+  
+  // Must be standing still and idle.
+  if (SPRITE->falling||SPRITE->wanding||SPRITE->walking) return 0;
+  
+  // Examine the one cell directly below our feet. It must have "goal" physics.
+  int x=(int)(sprite->x+sprite->w*0.5);
+  if ((x<0)||(x>=NS_sys_mapw)) return 0;
+  int y=(int)(sprite->y+sprite->h+0.5); // sic '+', and x has '*'; different things.
+  if ((y<0)||(y>=NS_sys_maph)) return 0;
+  if (g.physics[g.cellv[y*NS_sys_mapw+x]]!=NS_physics_goal) return 0;
+  
+  // Hooray!
+  return 1;
 }
 
 /* Update walking.

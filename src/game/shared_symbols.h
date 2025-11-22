@@ -27,6 +27,8 @@
 
 #define NS_physics_vacant 0
 #define NS_physics_solid 1
+#define NS_physics_goal 2
+#define NS_physics_hazard 3
 
 // Editor uses the comment after a 'sprtype' symbol as a prompt in the new-sprite modal.
 // Should match everything after 'spriteid' in the CMD_map_sprite args.

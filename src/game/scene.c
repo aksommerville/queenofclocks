@@ -1,5 +1,8 @@
 #include "queenofclocks.h"
 
+#define FADE_OUT_TIME 0.500
+#define FADE_IN_TIME  0.250
+
 /* Render bgbits.
  */
  
@@ -53,6 +56,8 @@ int qc_scene_load(int mapid) {
    */
   g.mapid=mapid;
   g.cellv=map.v;
+  g.termclock=0.0;
+  g.fadeclock=FADE_IN_TIME;
   qc_bgbits_render();
   
   /* Run commands.
@@ -77,10 +82,56 @@ int qc_scene_load(int mapid) {
   return 0;
 }
 
+/* Completion.
+ * This manages the whole affair, not just checking.
+ */
+ 
+static int qc_scene_check_completion(double elapsed) {
+
+  // Acquire the hero sprite, may be null.
+  struct sprite *hero=0;
+  if (g.grpv[NS_sprgrp_hero].sprc>=1) hero=g.grpv[NS_sprgrp_hero].sprv[0];
+  
+  // If we already have a termination clock, tick it and react when it expires.
+  if (g.termclock>0.0) {
+    if ((g.termclock-=elapsed)>0.0) return 0; // please hold
+    if (hero) {
+      fprintf(stderr,"win map:%d\n",g.mapid);
+      return qc_scene_load(g.mapid+1);
+    } else {
+      fprintf(stderr,"lose map:%d\n",g.mapid);
+      return qc_scene_load(g.mapid);
+    }
+  }
+  
+  // If the hero is missing, you lose. Start ticking the clock.
+  if (!hero) {
+    fprintf(stderr,"hero missing!\n");
+    g.termclock=FADE_OUT_TIME;
+    return 0;
+  }
+  
+  // Player can tell us whether she's standing still on the goal. If so, start the clock.
+  if (sprite_hero_in_victory_position(hero)) {
+    fprintf(stderr,"victory! please hold\n");
+    g.termclock=FADE_OUT_TIME;
+  }
+  
+  return 0;
+}
+
 /* Update.
  */
  
 void qc_scene_update(double elapsed) {
+
+  if (g.fadeclock>0.0) g.fadeclock-=elapsed;
+  
+  // Check completion. Do this at the start of the cycle, so a newly-loaded scene gets its first update before its first render.
+  if (qc_scene_check_completion(elapsed)<0) {
+    egg_terminate(1);
+    return;
+  }
 
   /* Update the sprites.
    * We'll make a copy of the update group every frame, and operate off that.
@@ -98,8 +149,6 @@ void qc_scene_update(double elapsed) {
   
   // Execute all of deathrow.
   sprite_group_kill(g.grpv+NS_sprgrp_deathrow);
-  
-  //TODO Transitions, termination, etc.
 }
 
 /* Render scene.
@@ -129,6 +178,15 @@ void qc_scene_render() {
       int dsty=(int)((sprite->y+sprite->h*0.5)*NS_sys_tilesize);
       graf_tile(&g.graf,dstx,dsty,sprite->tileid,sprite->xform);
     }
+  }
+  
+  // Fading in or out?
+  int fadealpha=0;
+  if (g.termclock>0.0) fadealpha=0xff-(int)((g.termclock*255.0)/FADE_OUT_TIME);
+  else if (g.fadeclock>0.0) fadealpha=(int)((g.fadeclock*255.0)/FADE_IN_TIME);
+  if (fadealpha>0) {
+    if (fadealpha>0xff) fadealpha=0xff;
+    graf_fill_rect(&g.graf,0,0,FBW,FBH,0x00000000|fadealpha);
   }
 
   //TODO overlay?

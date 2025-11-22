@@ -51,7 +51,10 @@ int sprite_collides_grid(const struct sprite *sprite,int x,int y,int w,int h) {
     int xi=w;
     for (;xi-->0;p++) {
       // For now, all sprites are alike and the only physics value we care about is "solid".
-      if (g.physics[*p]==NS_physics_solid) return 1;
+      switch (g.physics[*p]) {
+        case NS_physics_solid: return 1;
+        case NS_physics_goal: return 1;
+      }
     }
   }
   return 0;

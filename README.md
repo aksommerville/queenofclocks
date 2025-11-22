@@ -22,6 +22,8 @@ T 2025-11-25 Jam ends at 11:00.
 - [x] I think the current graphics are too fussy. Don't use an outline. Try a black sky and light walls (unoutlined sprites would read great against black).
 - [x] Hero motion.
 - [x] Physics. Generalize. We'll need a strong concept of seating, there's going to be lots of moving platforms.
+- [ ] Static hazards, death.
+- [ ] Allow to change wand direction if no pumpkin captured yet.
 - [ ] One-way platforms? I didn't account for these in physics. Do we want?
 - [ ] Wall hugging?
 - [ ] Wall jump?
@@ -32,6 +34,6 @@ T 2025-11-25 Jam ends at 11:00.
 - [ ] Other moving hazards. Chainsaw on wheels, etc.
 - [ ] Conveyor belts.
 - [x] Wand.
-- [ ] Goal and advancement.
+- [x] Goal and advancement.
 - [x] Music. I think just one song.
 - [ ] Sound effects.

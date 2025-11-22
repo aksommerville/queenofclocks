@@ -91,6 +91,8 @@ FOR_EACH_SPRTYPE
 const struct sprite_type *sprite_type_from_id(int id);
 const struct sprite_type *sprite_type_from_commands(const void *v,int c);
 
+int sprite_hero_in_victory_position(const struct sprite *sprite);
+
 /* Sprite group.
  *************************************************************************/
  

@@ -32,6 +32,8 @@ extern struct g {
   const uint8_t *cellv; // NS_sys_mapw*NS_sys_maph, never null except during init
   struct sprite_group grpv[32];
   struct sprite_group grp_updscratch;
+  double termclock; // If nonzero, counts down to termination.
+  double fadeclock; // '' fading in.
   
   struct sprite_group ctlpan_pumpkin;
 } g;
