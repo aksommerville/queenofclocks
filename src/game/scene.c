@@ -1,6 +1,7 @@
 #include "queenofclocks.h"
 
-#define FADE_OUT_TIME 0.500
+#define FADE_OUT_TIME_WIN 0.500
+#define FADE_OUT_TIME_LOSE 1.000
 #define FADE_IN_TIME  0.250
 
 /* Render bgbits.
@@ -96,25 +97,21 @@ static int qc_scene_check_completion(double elapsed) {
   if (g.termclock>0.0) {
     if ((g.termclock-=elapsed)>0.0) return 0; // please hold
     if (hero) {
-      fprintf(stderr,"win map:%d\n",g.mapid);
       return qc_scene_load(g.mapid+1);
     } else {
-      fprintf(stderr,"lose map:%d\n",g.mapid);
       return qc_scene_load(g.mapid);
     }
   }
   
   // If the hero is missing, you lose. Start ticking the clock.
   if (!hero) {
-    fprintf(stderr,"hero missing!\n");
-    g.termclock=FADE_OUT_TIME;
+    g.termclock=g.termtime=FADE_OUT_TIME_LOSE;
     return 0;
   }
   
   // Player can tell us whether she's standing still on the goal. If so, start the clock.
   if (sprite_hero_in_victory_position(hero)) {
-    fprintf(stderr,"victory! please hold\n");
-    g.termclock=FADE_OUT_TIME;
+    g.termclock=g.termtime=FADE_OUT_TIME_WIN;
   }
   
   return 0;
@@ -182,7 +179,7 @@ void qc_scene_render() {
   
   // Fading in or out?
   int fadealpha=0;
-  if (g.termclock>0.0) fadealpha=0xff-(int)((g.termclock*255.0)/FADE_OUT_TIME);
+  if (g.termclock>0.0) fadealpha=0xff-(int)((g.termclock*255.0)/g.termtime);
   else if (g.fadeclock>0.0) fadealpha=(int)((g.fadeclock*255.0)/FADE_IN_TIME);
   if (fadealpha>0) {
     if (fadealpha>0xff) fadealpha=0xff;

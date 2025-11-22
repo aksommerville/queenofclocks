@@ -30,15 +30,23 @@
 #define NS_physics_goal 2
 #define NS_physics_hazard 3
 
+#define NS_timescale_stop 0
+#define NS_timescale_slow 1
+#define NS_timescale_normal 2
+#define NS_timescale_fast 3
+#define NS_timescale_infinite 4
+
 // Editor uses the comment after a 'sprtype' symbol as a prompt in the new-sprite modal.
 // Should match everything after 'spriteid' in the CMD_map_sprite args.
 #define NS_sprtype_dummy 0 /* (u32)0 */
 #define NS_sprtype_hero 1 /* (u32)0 */
-#define NS_sprtype_platform 3 /* (u8)dx (u8)dy (u8)w (u8)0 */
+#define NS_sprtype_platform 3 /* (u8)dx (u8)dy (u8)w (u8:timescale)normal */
+#define NS_sprtype_soulballs 4 /* (u32)0 */
 #define FOR_EACH_SPRTYPE \
   _(dummy) \
   _(hero) \
-  _(platform)
+  _(platform) \
+  _(soulballs)
   
 #define NS_sprgrp_keepalive 0 /* Programmatic access only. */
 #define NS_sprgrp_deathrow  1 /* Programmatic access only. */

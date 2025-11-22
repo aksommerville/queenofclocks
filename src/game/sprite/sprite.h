@@ -142,6 +142,11 @@ int sprite_move(struct sprite *sprite,double dx,double dy);
  */
 int sprite_collides_grid(const struct sprite *sprite,int x,int y,int w,int h);
 
+/* Nonzero if it overlaps any cell of the given physics type.
+ * eg checking for hazards.
+ */
+int sprite_touches_grid_physics(const struct sprite *sprite,uint8_t physics);
+
 /* vector_from_dir() only returns -1,0,1. Diagonals are not normal; they're sqrt(2) longer than cardinals.
  */
 #define DIR_NW  0x80

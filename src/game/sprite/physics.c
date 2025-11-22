@@ -60,6 +60,32 @@ int sprite_collides_grid(const struct sprite *sprite,int x,int y,int w,int h) {
   return 0;
 }
 
+/* Check grid for hazards etc.
+ */
+ 
+int sprite_touches_grid_physics(const struct sprite *sprite,uint8_t physics) {
+  if (!sprite) return 0;
+  int cola=(int)(sprite->x);
+  int colz=(int)(sprite->x+sprite->w-SMALL);
+  if (cola<0) cola=0;
+  if (colz>=NS_sys_mapw) colz=NS_sys_mapw-1;
+  if (cola>colz) return 0;
+  int rowa=(int)(sprite->y);
+  int rowz=(int)(sprite->y+sprite->h-SMALL);
+  if (rowa<0) rowa=0;
+  if (rowz>=NS_sys_maph) rowz=NS_sys_maph-1;
+  if (rowa>rowz) return 0;
+  const uint8_t *rowp=g.cellv+rowa*NS_sys_mapw+cola;
+  for (;rowa<=rowz;rowa++,rowp+=NS_sys_mapw) {
+    const uint8_t *cellp=rowp;
+    int col=cola;
+    for (;col<=colz;col++,cellp++) {
+      if (g.physics[*cellp]==physics) return 1;
+    }
+  }
+  return 0;
+}
+
 /* Move sprite, public entry point.
  */
  

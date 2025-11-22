@@ -42,6 +42,8 @@ static int _platform_init(struct sprite *sprite) {
   sprite->x=midx-sprite->w*0.5;
   sprite->h=0.5;
   
+  sprite->timescale=sprite->arg&0xff;
+  
   return 0;
 }
 

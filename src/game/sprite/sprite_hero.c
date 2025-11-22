@@ -61,6 +61,20 @@ int sprite_hero_in_victory_position(const struct sprite *sprite) {
   return 1;
 }
 
+/* Get dead.
+ */
+ 
+static void hero_die(struct sprite *sprite) {
+  qc_sound(RID_sound_die,sprite->x+sprite->w*0.5);
+  struct sprite *soulballs=sprite_spawn(
+    sprite->x+sprite->w*0.5,sprite->y+sprite->h*0.5,
+    &sprite_type_soulballs, // not required but we can spare spawn a lookup, we know it
+    RID_sprite_soulballs,7, // A witch's soul has seven circles; that's an important bit of Dot lore.
+    0,0
+  );
+  sprite_group_add(g.grpv+NS_sprgrp_deathrow,sprite);
+}
+
 /* Update walking.
  * This is called every frame, with the current dpad state, whether walking or not.
  */
@@ -229,11 +243,9 @@ static uint8_t hero_dir_from_wanddir(const struct sprite *sprite) {
  
 static void hero_update_wand_active(struct sprite *sprite,double elapsed) {
 
-  // If we have some sprite locked, do something. TODO what?
+  // If we have some sprite locked, ctlpan takes over. Give it some room.
   struct sprite *pumpkin=ctlpan_is_active();
-  if (pumpkin) {
-    return;
-  }
+  if (pumpkin) return;
   
   // Find a sprite to lock on.
   struct frect bounds;
@@ -306,6 +318,8 @@ static void _hero_update(struct sprite *sprite,double elapsed) {
   
   if (g.input&EGG_BTN_SOUTH) hero_update_gravity(sprite,1,elapsed);
   else hero_update_gravity(sprite,0,elapsed);
+  
+  if (sprite_touches_grid_physics(sprite,NS_physics_hazard)) hero_die(sprite);
 }
 
 /* Render.
