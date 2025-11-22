@@ -65,6 +65,7 @@ void ctlpan_render() {
     by=(int)(pumpkin->y*NS_sys_tilesize)-bh;
   } else {
     by=(int)((pumpkin->y+pumpkin->h)*NS_sys_tilesize);
+    tongueup=1;
   }
   // (by) can't be oob because we've oriented centerward of the pumpkin.
   
@@ -74,7 +75,7 @@ void ctlpan_render() {
   int y=by+halftile;
   graf_tile(&g.graf,x,y,0x20,0); x+=NS_sys_tilesize;
   graf_tile(&g.graf,x,y,0x21,0); x+=NS_sys_tilesize;
-  graf_tile(&g.graf,x,y,0x22,tongueup?EGG_XFORM_YREV:0); x+=NS_sys_tilesize;
+  graf_tile(&g.graf,x,y+(tongueup?-1:0),0x22,tongueup?EGG_XFORM_YREV:0); x+=NS_sys_tilesize;
   graf_tile(&g.graf,x,y,0x21,0); x+=NS_sys_tilesize;
   graf_tile(&g.graf,x,y,0x23,0);
   

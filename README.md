@@ -31,6 +31,8 @@ T 2025-11-25 Jam ends at 11:00.
 - - [x] How to communicate with the hero? It's important that riding platforms operate smoothly.
 - [ ] Pushable blocks. (are we doing that?)
 - [x] Timed flamethrowers.
+- [ ] Motion-activated anti-burglar laser. Esp to give you a reason to direct fryguy's movement.
+- [ ] Flammable blocks that when fryguy encounters one, he farts fire on it.
 - [ ] Other moving hazards. Chainsaw on wheels, etc.
 - [ ] Conveyor belts.
 - [x] Soulballs.

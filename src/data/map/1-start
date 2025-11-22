@@ -23,10 +23,11 @@
 
 image image:terrain
 sprite @11,15 sprite:hero (u32)0
-sprite @3,19 sprite:platform (u8)0 (u8)255 (u8)3 (u8:timescale)fast
+sprite @9,6 sprite:platform (u8)0 (u8)255 (u8)3 (u8:timescale)normal
 sprite @18,13 sprite:platform (u8)1 (u8)0 (u8)2 (u8:timescale)stop
 sprite @2,10 sprite:platform (u8)0 (u8)1 (u8)1 (u8:timescale)slow
 sprite @6,1 sprite:flamethrower 0x02 (u8:timescale)normal 0x80 3
 sprite @6,20 sprite:flamethrower 0x08 (u8:timescale)normal 0x80 3
 sprite @32,19 sprite:flamethrower 0x10 (u8:timescale)normal 0x80 3
 sprite @15,20 sprite:flamethrower 0x40 (u8:timescale)normal 0x80 3
+sprite @13,2 sprite:fryguy 0x10 (u8:timescale)normal 0x0000

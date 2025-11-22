@@ -1,0 +1,4 @@
+type (u16:sprtype)fryguy
+image image:sprites
+tile 71 0
+groups (b32:sprgrp)render,update,motion,physics,hazard

@@ -47,6 +47,10 @@ struct sprite_type {
    */
   void (*grab)(struct sprite *sprite,int grab,struct sprite *grabber,uint8_t dir);
   
+  /* Receive damage from (assailant).
+   * If these sprites are in the physics, fragile, and hazard groups, this can be delivered generically during collision detection.
+   * DO NOT DELETE either sprite! (but then that is standing policy for all hooks too).
+   */
   void (*injure)(struct sprite *sprite,struct sprite *assailant);
 };
 

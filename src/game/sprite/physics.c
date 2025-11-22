@@ -86,6 +86,23 @@ int sprite_touches_grid_physics(const struct sprite *sprite,uint8_t physics) {
   return 0;
 }
 
+/* Check for generically-deliverable damage between two colliding sprites.
+ * This is symmetric.
+ */
+ 
+static void sprite_check_damage(struct sprite *a,struct sprite *b) {
+  if (a->type->injure) {
+    if (sprite_group_has(g.grpv+NS_sprgrp_hazard,b)&&sprite_group_has(g.grpv+NS_sprgrp_fragile,a)) {
+      a->type->injure(a,b);
+    }
+  }
+  if (b->type->injure) {
+    if (sprite_group_has(g.grpv+NS_sprgrp_hazard,a)&&sprite_group_has(g.grpv+NS_sprgrp_fragile,b)) {
+      b->type->injure(b,a);
+    }
+  }
+}
+
 /* Move sprite, public entry point.
  */
  
@@ -182,9 +199,9 @@ int sprite_move(struct sprite *sprite,double dx,double dy) {
     if (other->x+other->w<=fullx) continue;
     if (other->y+other->h<=fully) continue;
     
-    // If we are carrful and moving up, try moving the other first.
-    if (sprite->type->carrful&&(dir==DIR_N)&&0) {
-      if (sprite_move(other,0.0,dy)) continue;
+    // A collision exists. Check for generic damage.
+    if (sprite->type->injure||other->type->injure) {
+      sprite_check_damage(sprite,other);
     }
     
     // Collision against solid sprite.
@@ -192,13 +209,14 @@ int sprite_move(struct sprite *sprite,double dx,double dy) {
       case DIR_W: {
           nx=other->x+other->w;
           if (nx>=sprite->x) return 0;
+          fullx=nx;
           fullw=sprite->x+sprite->w-nx;
           fullr=fullx+fullw;
         } break;
       case DIR_E: {
           nx=other->x-sprite->w;
           if (nx<=sprite->x) return 0;
-          fullw=nx+sprite->x-sprite->x;
+          fullw=nx+sprite->w-sprite->x;
           fullr=fullx+fullw;
         } break;
       case DIR_N: {
@@ -206,6 +224,7 @@ int sprite_move(struct sprite *sprite,double dx,double dy) {
           if (sprite->type->carrful) sprite_move(other,0.0,dy);
           ny=other->y+other->h;
           if (ny>=sprite->y) return 0;
+          fully=ny;
           fullh=sprite->y+sprite->h-ny;
           fullb=fully+fullh;
         } break;

@@ -43,12 +43,14 @@
 #define NS_sprtype_platform 3 /* (u8)dx (u8)dy (u8)w (u8:timescale)normal */
 #define NS_sprtype_soulballs 4 /* (u32)0 */
 #define NS_sprtype_flamethrower 5 /* (u8)dir (u8:timescale)normal (u8)period (u8)phase */
+#define NS_sprtype_fryguy 6 /* (u8)dir (u8:timescale)normal 0x0000 */
 #define FOR_EACH_SPRTYPE \
   _(dummy) \
   _(hero) \
   _(platform) \
   _(soulballs) \
-  _(flamethrower)
+  _(flamethrower) \
+  _(fryguy)
   
 #define NS_sprgrp_keepalive 0 /* Programmatic access only. */
 #define NS_sprgrp_deathrow  1 /* Programmatic access only. */
