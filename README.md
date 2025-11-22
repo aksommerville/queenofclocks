@@ -30,7 +30,7 @@ T 2025-11-25 Jam ends at 11:00.
 - [x] Moving platforms.
 - - [x] How to communicate with the hero? It's important that riding platforms operate smoothly.
 - [ ] Pushable blocks. (are we doing that?)
-- [ ] Timed flamethrowers.
+- [x] Timed flamethrowers.
 - [ ] Other moving hazards. Chainsaw on wheels, etc.
 - [ ] Conveyor belts.
 - [x] Soulballs.

@@ -1,5 +1,5 @@
 type (u16:sprtype)hero
 image image:sprites
 tile 16 0
-groups (b32:sprgrp)render,update,hero,motion,physics
+groups (b32:sprgrp)render,update,hero,motion,physics,fragile
 size 0x0100 0x0200

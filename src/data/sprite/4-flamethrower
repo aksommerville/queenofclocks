@@ -1,0 +1,5 @@
+type (u16:sprtype)flamethrower
+image image:sprites
+tile 80 0
+groups (b32:sprgrp)render,update,physics,motion
+layer 0x0101

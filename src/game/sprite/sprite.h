@@ -46,6 +46,8 @@ struct sprite_type {
    * Everything in motion group must implement this.
    */
   void (*grab)(struct sprite *sprite,int grab,struct sprite *grabber,uint8_t dir);
+  
+  void (*injure)(struct sprite *sprite,struct sprite *assailant);
 };
 
 struct sprite_group {

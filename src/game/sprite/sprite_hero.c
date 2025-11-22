@@ -334,6 +334,13 @@ static void _hero_update(struct sprite *sprite,double elapsed) {
   if (sprite_touches_grid_physics(sprite,NS_physics_hazard)) hero_die(sprite);
 }
 
+/* Get hurt, generically.
+ */
+ 
+static void _hero_injure(struct sprite *sprite,struct sprite *assailant) {
+  hero_die(sprite);
+}
+
 /* Render.
  */
  
@@ -383,4 +390,5 @@ const struct sprite_type sprite_type_hero={
   .init=_hero_init,
   .update=_hero_update,
   .render=_hero_render,
+  .injure=_hero_injure,
 };
