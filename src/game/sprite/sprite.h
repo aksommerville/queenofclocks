@@ -99,6 +99,11 @@ const struct sprite_type *sprite_type_from_commands(const void *v,int c);
 
 int sprite_hero_in_victory_position(const struct sprite *sprite);
 
+/* Examines all the password sprites and returns the displayed value, or <0 if invalid.
+ * There's some magic caching in the background, it's fine to spam this.
+ */
+int sprite_password_get();
+
 /* Sprite group.
  *************************************************************************/
  
@@ -170,6 +175,16 @@ void extend_line_of_sight(double *dstx,double *dsty,double ax,double ay,double t
  * Edges do not count.
  */
 int sprite_touches_line(const struct sprite *sprite,double ax,double ay,double bx,double by);
+
+/* If any sprite collides with (sprite), move it by the minimum escapement.
+ * (sprite) itself will not move.
+ * For passgate. But generally, anything that becomes solid suddenly should use this.
+ */
+void sprite_force_out_collisions(const struct sprite *sprite);
+
+/* Nonzero if a collision exists against (sprite). We don't say with what, or how deep.
+ */
+int sprite_collides_anything(const struct sprite *sprite);
 
 /* vector_from_dir() only returns -1,0,1. Diagonals are not normal; they're sqrt(2) longer than cardinals.
  */

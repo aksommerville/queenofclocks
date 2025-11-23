@@ -210,18 +210,32 @@ static int hero_pumpkincmp(const struct sprite *sprite,const struct sprite *a,co
         double aq=a->y+a->h,bq=b->y+b->h;
         if (aq>bq) return -1;
         if (aq<bq) return 1;
+        double adx=a->x+a->w*0.5-(sprite->x+sprite->w*0.5); if (adx<0.0) adx=-adx;
+        double bdx=b->x+b->w*0.5-(sprite->x+sprite->w*0.5); if (bdx<0.0) bdx=-bdx;
+        if (adx<bdx) return -1;
+        if (adx>bdx) return 1;
       } break;
     case 1: {
         if (a->y<b->y) return -1;
         if (a->y>b->y) return 1;
+        double adx=a->x+a->w*0.5-(sprite->x+sprite->w*0.5); if (adx<0.0) adx=-adx;
+        double bdx=b->x+b->w*0.5-(sprite->x+sprite->w*0.5); if (bdx<0.0) bdx=-bdx;
+        if (adx<bdx) return -1;
+        if (adx>bdx) return 1;
       } break;
-    default: if (sprite->xform&EGG_XFORM_XREV) {
-        double aq=a->x+a->w,bq=b->x+b->w;
-        if (aq>bq) return -1;
-        if (aq<bq) return 1;
-      } else {
-        if (a->x<b->x) return -1;
-        if (a->x>b->x) return 1;
+    default: {
+        if (sprite->xform&EGG_XFORM_XREV) {
+          double aq=a->x+a->w,bq=b->x+b->w;
+          if (aq>bq) return -1;
+          if (aq<bq) return 1;
+        } else {
+          if (a->x<b->x) return -1;
+          if (a->x>b->x) return 1;
+        }
+        double ady=a->y+a->h*0.5-(sprite->y+sprite->h*0.5); if (ady<0.0) ady=-ady;
+        double bdy=b->y+b->h*0.5-(sprite->y+sprite->h*0.5); if (bdy<0.0) bdy=-bdy;
+        if (ady<bdy) return -1;
+        if (ady>bdy) return 1;
       }
   }
   return 0;

@@ -36,9 +36,9 @@ T 2025-11-25 Jam ends at 11:00.
 - [ ] Other moving hazards. Chainsaw on wheels, etc.
 - [ ] Conveyor belts.
 - [x] Soulballs.
-- [ ] Password-entry puzzle where there are changing digits you can adjust.
+- [x] Password-entry puzzle where there are changing digits you can adjust.
 - [ ] Real maps. 10..15 should be good.
-- [ ] Don't wand thru walls. Or do. Or a fixed distance limit. Does it matter?
+- [ ] Don't wand thru walls. Or do. Or a fixed distance limit. Does it matter? 
 - [x] Wand.
 - [x] Goal and advancement.
 - [x] Music. I think just one song.

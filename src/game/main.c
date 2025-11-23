@@ -74,7 +74,21 @@ void egg_client_render() {
  */
 
 void qc_sound(int rid,double x) {
-  //TODO Will we need a limiter?
+  
+  double now=egg_time_real();
+  struct sndplay *rewrite=g.sndplayv;
+  struct sndplay *sndplay=g.sndplayv;
+  int i=SNDPLAY_LIMIT;
+  for (;i-->0;sndplay++) {
+    if (sndplay->time<rewrite->time) rewrite=sndplay; // Find the oldest.
+    if (sndplay->rid==rid) {
+      double since=now-sndplay->time;
+      if (since<=0.050) return; // Drop sounds if within 50 ms. Otherwise we're repeating PCM at greater than 20 Hz and could get some weird artifacts.
+    }
+  }
+  rewrite->time=now;
+  rewrite->rid=rid;
+  
   double pan=0.0;
   if (x>=0.0) {
     pan=(x*2.0)/NS_sys_mapw-1.0;

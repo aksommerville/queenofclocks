@@ -498,3 +498,100 @@ void extend_line_of_sight(double *dstx,double *dsty,double ax,double ay,double t
   *dstx=bx;
   *dsty=by;
 }
+
+/* Escape anything colliding with this sprite immediately.
+ */
+
+void sprite_force_out_collisions(const struct sprite *sprite) {
+  if (!sprite) return;
+  double l=sprite->x,t=sprite->y;
+  double r=l+sprite->w,b=t+sprite->h;
+  struct sprite **otherp=g.grpv[NS_sprgrp_physics].sprv;
+  int otheri=g.grpv[NS_sprgrp_physics].sprc;
+  for (;otheri-->0;otherp++) {
+    struct sprite *other=*otherp;
+    if (other==sprite) continue;
+    double ol=other->x,ot=other->y;
+    if (ol>=r) continue;
+    if (ot>=t) continue;
+    double or=ol+other->w,ob=ot+other->h;
+    if (or<=l) continue;
+    if (ob<=t) continue;
+    
+    // They collide. Enumerate the four escapements and sort by distance.
+    double x0=ol,y0=ot;
+    struct esc { double distance,dx,dy; } escv[4]={0};
+    escv[0].dx=l-or; escv[0].distance=-escv[0].dx;
+    escv[1].dx=r-ol; escv[1].distance=escv[1].dx;
+    escv[2].dy=t-ob; escv[2].distance=-escv[2].dy;
+    escv[3].dy=b-ot; escv[3].distance=escv[3].dy;
+    #define SWAP(a,b) { struct esc tmp=escv[a]; escv[a]=escv[b]; escv[b]=tmp; }
+    if (escv[0].distance>escv[1].distance) SWAP(0,1)
+    if (escv[1].distance>escv[2].distance) SWAP(1,2)
+    if (escv[2].distance>escv[3].distance) SWAP(2,3)
+    if (escv[0].distance>escv[1].distance) SWAP(0,1)
+    if (escv[1].distance>escv[2].distance) SWAP(1,2)
+    if (escv[0].distance>escv[1].distance) SWAP(0,1)
+    #undef SWAP
+    
+    // Try all four and accept the first that leaves (other) in a valid position.
+    // If none of them does, keep it where it is.
+    struct esc *esc=escv;
+    int ei=4;
+    for (;ei-->0;esc++) {
+      other->x+=esc->dx;
+      other->y+=esc->dy;
+      if (!sprite_collides_anything(other)) break;
+      other->x=x0;
+      other->y=y0;
+    }
+  }
+}
+
+/* Check for any collision.
+ * This is a simplified form of the tests in sprite_move().
+ */
+ 
+int sprite_collides_anything(const struct sprite *sprite) {
+  if (!sprite) return 0;
+  
+  int cola=(int)(sprite->x);
+  int colz=(int)(sprite->x+sprite->w-SMALL);
+  int rowa=(int)(sprite->y);
+  int rowz=(int)(sprite->y+sprite->h-SMALL);
+  if (cola<0) cola=0;
+  if (colz>=NS_sys_mapw) colz=NS_sys_mapw-1;
+  if (rowa<0) rowa=0;
+  if (rowz>=NS_sys_maph) rowz=NS_sys_maph-1;
+  if ((cola<=colz)&&(rowa<=rowz)) {
+    const uint8_t *cellrow=g.cellv+rowa*NS_sys_mapw+cola;
+    int row=rowa;
+    for (;row<=rowz;row++,cellrow+=NS_sys_mapw) {
+      const uint8_t *cellp=cellrow;
+      int col=cola;
+      for (;col<=colz;col++,cellp++) {
+        switch (g.physics[*cellp]) {
+          case NS_physics_solid:
+          case NS_physics_goal:
+            return 1;
+        }
+      }
+    }
+  }
+  
+  double fullr=sprite->x+sprite->w;
+  double fullb=sprite->y+sprite->h;
+  struct sprite **otherp=g.grpv[NS_sprgrp_physics].sprv;
+  int otheri=g.grpv[NS_sprgrp_physics].sprc;
+  for (;otheri-->0;otherp++) {
+    struct sprite *other=*otherp;
+    if (other==sprite) continue;
+    if (other->x>=fullr) continue;
+    if (other->y>=fullb) continue;
+    if (other->x+other->w<=sprite->x) continue;
+    if (other->y+other->h<=sprite->y) continue;
+    return 1;
+  }
+
+  return 0;
+}

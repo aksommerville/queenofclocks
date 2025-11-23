@@ -12,6 +12,9 @@
 #define FBW 320
 #define FBH 176
 
+// Track so many recent sounds. Don't play it again within some brief interval.
+#define SNDPLAY_LIMIT 8
+
 struct frect { double l,r,t,b; };
 
 extern struct g {
@@ -26,6 +29,7 @@ extern struct g {
   int texid_terrain;
   int texid_sprites;
   uint8_t physics[256];
+  struct sndplay { double time; int rid; } sndplayv[SNDPLAY_LIMIT];
   
   int texid_bgbits;
   int mapid;
