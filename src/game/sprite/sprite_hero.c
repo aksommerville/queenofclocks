@@ -384,7 +384,7 @@ static void _hero_render(struct sprite *sprite,int dstx,int dsty) {
  */
 
 const struct sprite_type sprite_type_hero={
-  .name="dummy",
+  .name="hero",
   .objlen=sizeof(struct sprite_hero),
   .del=_hero_del,
   .init=_hero_init,

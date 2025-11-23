@@ -44,22 +44,25 @@
 #define NS_sprtype_soulballs 4 /* (u32)0 */
 #define NS_sprtype_flamethrower 5 /* (u8)dir (u8:timescale)normal (u8)period (u8)phase */
 #define NS_sprtype_fryguy 6 /* (u8)dir (u8:timescale)normal 0x0000 */
+#define NS_sprtype_motionsensor 7 /* (u32)0 */
 #define FOR_EACH_SPRTYPE \
   _(dummy) \
   _(hero) \
   _(platform) \
   _(soulballs) \
   _(flamethrower) \
-  _(fryguy)
+  _(fryguy) \
+  _(motionsensor)
   
-#define NS_sprgrp_keepalive 0 /* Programmatic access only. */
-#define NS_sprgrp_deathrow  1 /* Programmatic access only. */
-#define NS_sprgrp_render    2 /* All should join. */
-#define NS_sprgrp_update    3 /* Anything that needs updates, typically everything. */
-#define NS_sprgrp_hero      4 /* Should always contain just one hero sprite. Or empty if she's dead. */
-#define NS_sprgrp_motion    5 /* Anything with a speed that Dot can control. */
-#define NS_sprgrp_physics   6 /* Participates in physics. */
-#define NS_sprgrp_hazard    7 /* Hurts Dot on contact. */
-#define NS_sprgrp_fragile   8 /* Probably just Dot, but maybe there's damageable pumpkins too. */
+#define NS_sprgrp_keepalive  0 /* Programmatic access only. */
+#define NS_sprgrp_deathrow   1 /* Programmatic access only. */
+#define NS_sprgrp_render     2 /* All should join. */
+#define NS_sprgrp_update     3 /* Anything that needs updates, typically everything. */
+#define NS_sprgrp_hero       4 /* Should always contain just one hero sprite. Or empty if she's dead. */
+#define NS_sprgrp_motion     5 /* Anything with a speed that Dot can control. */
+#define NS_sprgrp_physics    6 /* Participates in physics. */
+#define NS_sprgrp_hazard     7 /* Hurts Dot on contact. */
+#define NS_sprgrp_fragile    8 /* Probably just Dot, but maybe there's damageable pumpkins too. */
+#define NS_sprgrp_detectable 9 /* Motionsensor can detect it. */
 
 #endif

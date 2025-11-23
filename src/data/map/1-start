@@ -31,3 +31,4 @@ sprite @6,20 sprite:flamethrower 0x08 (u8:timescale)normal 0x80 3
 sprite @32,19 sprite:flamethrower 0x10 (u8:timescale)normal 0x80 3
 sprite @15,20 sprite:flamethrower 0x40 (u8:timescale)normal 0x80 3
 sprite @13,2 sprite:fryguy 0x10 (u8:timescale)normal 0x0000
+sprite @29,6 sprite:motionsensor (u32)0

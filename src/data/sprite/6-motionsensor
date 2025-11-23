@@ -1,0 +1,5 @@
+type (u16:sprtype)motionsensor
+image image:sprites
+tile 96 0
+groups (b32:sprgrp)render,update,physics,motion
+layer 0x0001

@@ -35,6 +35,7 @@ extern struct g {
   double termclock; // If nonzero, counts down to termination.
   double fadeclock; // '' fading in.
   double termtime; // Range for termclock (fadeclock's is constant).
+  int framec; // Global.
   
   struct sprite_group ctlpan_pumpkin;
 } g;

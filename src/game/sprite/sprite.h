@@ -153,6 +153,24 @@ int sprite_collides_grid(const struct sprite *sprite,int x,int y,int w,int h);
  */
 int sprite_touches_grid_physics(const struct sprite *sprite,uint8_t physics);
 
+/* Nonzero if there is a straight line between their centers which doesn't cross
+ * any other solid sprite or solid grid cell.
+ * Using midpoints instead of corner-to-corner favors hiding and is a bit more efficient.
+ */
+int sprites_have_line_of_sight(const struct sprite *a,const struct sprite *b);
+
+/* Line segment starting at (ax,ay) with angle (t), zero is down, clockwise.
+ * Fill (dstx,dsty) with the far endpoint, on the perimeter of some solid.
+ * May exceed the screen's bounds to some sane but arbitrary distance, if there's no collision.
+ * Sprites in physics group do count as solids but not those in detectable group.
+ */
+void extend_line_of_sight(double *dstx,double *dsty,double ax,double ay,double t);
+
+/* Nonzero if (ax,ay .. bx,by) terminates in the sprite or passes through it.
+ * Edges do not count.
+ */
+int sprite_touches_line(const struct sprite *sprite,double ax,double ay,double bx,double by);
+
 /* vector_from_dir() only returns -1,0,1. Diagonals are not normal; they're sqrt(2) longer than cardinals.
  */
 #define DIR_NW  0x80

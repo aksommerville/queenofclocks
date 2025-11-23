@@ -63,6 +63,7 @@ void egg_client_update(double elapsed) {
 
 
 void egg_client_render() {
+  g.framec++;
   graf_reset(&g.graf);
   qc_scene_render();
   ctlpan_render();

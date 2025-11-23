@@ -263,3 +263,238 @@ int sprite_move(struct sprite *sprite,double dx,double dy) {
 
   return 1;
 }
+
+/* Line to line collision.
+ * Edges don't count.
+ */
+ 
+static int lines_cross(
+  double aax,double aay,double abx,double aby,
+  double bax,double bay,double bbx,double bby
+) {
+  // We take two pairs of cross-products: Both B points from AA, and both A points from BA.
+  // Both pairs must have opposite signs. Zero doesn't count as opposite, that's the edge case.
+  double cpaa=((bax-aax)*(aby-aay))-((bay-aay)*(abx-aax));
+  double cpab=((bbx-aax)*(aby-aay))-((bby-aay)*(abx-aax));
+  double cpba=((aax-bax)*(bby-bay))-((aay-bay)*(bbx-bax));
+  double cpbb=((abx-bax)*(bby-bay))-((aby-bay)*(bbx-bax));
+  if (!(((cpaa<0.0)&&(cpab>0.0))||((cpaa>0.0)&&(cpab<0.0)))) return 0;
+  if (!(((cpba<0.0)&&(cpbb>0.0))||((cpba>0.0)&&(cpbb<0.0)))) return 0;
+  return 1;
+}
+
+/* Line to rectangle collision.
+ */
+ 
+int sprite_touches_line(const struct sprite *sprite,double ax,double ay,double bx,double by) {
+  if (!sprite) return 0;
+  double l=sprite->x,t=sprite->y;
+  double r=l+sprite->w,b=t+sprite->h;
+  
+  // First, if either endpoint is in bounds, it's a collision.
+  if ((ax>l)&&(ax<r)&&(ay>t)&&(ay<b)) return 1;
+  if ((bx>l)&&(bx<r)&&(by>t)&&(by<b)) return 1;
+  
+  // Next, if the line crosses either of the sprite's diagonals, it's a collision.
+  if (lines_cross(ax,ay,bx,by,l,t,r,b)) return 1;
+  if (lines_cross(ax,ay,bx,by,r,t,l,b)) return 1;
+  
+  return 0;
+}
+
+// Same as the above, but a loose rectangle instead of a sprite.
+int rect_touches_line(
+  double x,double y,double w,double h,
+  double ax,double ay,double bx,double by
+) {
+  double r=x+w,b=y+h;
+  if ((ax>x)&&(ax<r)&&(ay>y)&&(ay<b)) return 1;
+  if ((bx>x)&&(bx<r)&&(by>y)&&(by<b)) return 1;
+  if (lines_cross(ax,ay,bx,by,x,y,r,b)) return 1;
+  if (lines_cross(ax,ay,bx,by,r,y,x,b)) return 1;
+  return 0;
+}
+
+/* Test line of sight.
+ */
+ 
+int sprites_have_line_of_sight(const struct sprite *a,const struct sprite *b) {
+  if (!a||!b) return 0;
+  double ax=a->x+a->w*0.5;
+  double ay=a->y+a->h*0.5;
+  double bx=b->x+b->w*0.5;
+  double by=b->y+b->h*0.5;
+  
+  // Check for collisions against other solid sprites.
+  struct sprite **otherp=g.grpv[NS_sprgrp_physics].sprv;
+  int otheri=g.grpv[NS_sprgrp_physics].sprc;
+  for (;otheri-->0;otherp++) {
+    struct sprite *other=*otherp;
+    if ((other==a)||(other==b)) continue;
+    if (sprite_touches_line(other,ax,ay,bx,by)) return 0;
+  }
+  
+  /* Next check each grid cell that the line cross. Tricky!
+   * No doubt there is a graceful solution that quantizes the line iteratively.
+   * But I'm dumb and in a hurry, so we'll do it the dumb way.
+   * Determine the grid bounds that cover the line, then test each cell in those bounds.
+   */
+  int cola=(int)ax,colz=(int)bx;
+  if (cola>colz) { int tmp=cola; cola=colz; colz=tmp; }
+  if (cola<0) cola=0;
+  if (colz>=NS_sys_mapw) colz=NS_sys_mapw-1;
+  if (cola<=colz) {
+    int rowa=(int)ay,rowz=(int)by;
+    if (rowa>rowz) { int tmp=rowa; rowa=rowz; rowz=tmp; }
+    if (rowa<0) rowa=0;
+    if (rowz>=NS_sys_maph) rowz=NS_sys_maph-1;
+    if (rowa<=rowz) {
+      const uint8_t *gridrow=g.cellv+rowa*NS_sys_mapw+cola;
+      int row=rowa;
+      for (;row<=rowz;row++,gridrow+=NS_sys_mapw) {
+        const uint8_t *gridp=gridrow;
+        int col=cola;
+        for (;col<=colz;col++,gridp++) {
+          switch (g.physics[*gridp]) {
+            case NS_physics_solid:
+            case NS_physics_goal:
+              break;
+            default: continue;
+          }
+          // It's solid. Does the line cross it?
+          if (rect_touches_line(col,row,1.0,1.0,ax,ay,bx,by)) return 0;
+        }
+      }
+    }
+  }
+  
+  return 1;
+}
+
+/* Extend line of sight. Complex rules.
+ */
+ 
+void extend_line_of_sight(double *dstx,double *dsty,double ax,double ay,double t) {
+  /* The basic idea:
+   *  - Extend first to a constant limit, NS_sys_mapw.
+   *  - Clip against sprites, examining up to two faces of each, the ones with exposure to (ax,ay).
+   *  - The same hacky grid logic as testing line of sight, but clipping as we do against sprites.
+   * So we're trimming the line down iteratively, it can get smaller as we run.
+   */
+  double bx=ax-sin(t)*NS_sys_mapw;
+  double by=ay+cos(t)*NS_sys_mapw;
+  double d2=(bx-ax)*(bx-ax)+(by-ay)*(by-ay);
+  
+  #define CANDIDATE(cx,cy) { \
+    double _cx=(cx),_cy=(cy); \
+    double cd2=((_cx-ax)*(_cx-ax))+((_cy-ay)*(_cy-ay)); \
+    if (cd2<d2) { \
+      bx=_cx; \
+      by=_cy; \
+      d2=cd2; \
+    } \
+  }
+  
+  // Check sprites.
+  struct sprite **spritep=g.grpv[NS_sprgrp_physics].sprv;
+  int spritei=g.grpv[NS_sprgrp_physics].sprc;
+  for (;spritei-->0;spritep++) {
+    struct sprite *sprite=*spritep;
+    
+    // Find the line's collision point against my exposed faces.
+    // Do call edges in bounds, otherwise the laser might be able to sneak thru a corner, in a wildly-improbable alignment.
+    // There might not be an exposed face, if (ax,ay) is inside the sprite.
+    // But that situation doesn't make sense so just ignore the sprite then.
+    if (sprite->x>ax) { // Left face exposure.
+      double qy=ay+((sprite->x-ax)*(by-ay))/(bx-ax);
+      if ((qy>=sprite->y)&&(qy<=sprite->y+sprite->h)) {
+        if (sprite_group_has(g.grpv+NS_sprgrp_detectable,sprite)) continue; // oops no, actually we don't want it
+        CANDIDATE(sprite->x,qy)
+        continue;
+      }
+    } else if (sprite->x+sprite->w<ax) { // Right face exposure.
+      double qx=sprite->x+sprite->w;
+      double qy=ay+((qx-ax)*(by-ay))/(bx-ax);
+      if ((qy>=sprite->y)&&(qy<=sprite->y+sprite->h)) {
+        if (sprite_group_has(g.grpv+NS_sprgrp_detectable,sprite)) continue;
+        CANDIDATE(qx,qy)
+        continue;
+      }
+    }
+    if (sprite->y>ay) { // Top face exposure.
+      double qx=ax+((sprite->y-ay)*(bx-ax))/(by-ay);
+      if ((qx>=sprite->x)&&(qx<=sprite->x+sprite->w)) {
+        if (sprite_group_has(g.grpv+NS_sprgrp_detectable,sprite)) continue;
+        CANDIDATE(qx,sprite->y)
+        continue;
+      }
+    } else if (sprite->y+sprite->h<ay) { // Bottom face exposure. Shouldn't come up in real life, since this is only used for the down-pointing motionsensor.
+      double qy=sprite->y+sprite->h;
+      double qx=ax+((qy-ay)*(bx-ax))/(by-ay);
+      if ((qx>=sprite->x)&&(qx<=sprite->x+sprite->w)) {
+        if (sprite_group_has(g.grpv+NS_sprgrp_detectable,sprite)) continue;
+        CANDIDATE(qx,qy)
+        continue;
+      }
+    }
+  }
+  
+  // Map. Same cheap hack as testing line of sight, but clip like above and keep going.
+  int cola=(int)ax,colz=(int)bx;
+  if (cola>colz) { int tmp=cola; cola=colz; colz=tmp; }
+  if (cola<0) cola=0;
+  if (colz>=NS_sys_mapw) colz=NS_sys_mapw-1;
+  if (cola<=colz) {
+    int rowa=(int)ay,rowz=(int)by;
+    if (rowa>rowz) { int tmp=rowa; rowa=rowz; rowz=tmp; }
+    if (rowa<0) rowa=0;
+    if (rowz>=NS_sys_maph) rowz=NS_sys_maph-1;
+    if (rowa<=rowz) {
+      const uint8_t *gridrow=g.cellv+rowa*NS_sys_mapw+cola;
+      int row=rowa;
+      for (;row<=rowz;row++,gridrow+=NS_sys_mapw) {
+        const uint8_t *gridp=gridrow;
+        int col=cola;
+        for (;col<=colz;col++,gridp++) {
+          switch (g.physics[*gridp]) {
+            case NS_physics_solid:
+            case NS_physics_goal:
+              break;
+            default: continue;
+          }
+          double l=col,t=row,r=col+1.0,b=row+1.0;
+          if (l>ax) { // Left face exposure.
+            double qy=ay+((l-ax)*(by-ay))/(bx-ax);
+            if ((qy>=t)&&(qy<=b)) {
+              CANDIDATE(l,qy)
+              continue;
+            }
+          } else if (r<ax) { // Right face exposure.
+            double qy=ay+((r-ax)*(by-ay))/(bx-ax);
+            if ((qy>=t)&&(qy<=b)) {
+              CANDIDATE(r,qy)
+              continue;
+            }
+          }
+          if (t>ay) { // Top face exposure.
+            double qx=ax+((t-ay)*(bx-ax))/(by-ay);
+            if ((qx>=l)&&(qx<=r)) {
+              CANDIDATE(qx,t)
+              continue;
+            }
+          } else if (b<ay) { // Bottom face exposure. Shouldn't come up in real life, since this is only used for the down-pointing motionsensor.
+            double qx=ax+((b-ay)*(bx-ax))/(by-ay);
+            if ((qx>=l)&&(qx<=r)) {
+              CANDIDATE(qx,r)
+              continue;
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  #undef CANDIDATE
+  *dstx=bx;
+  *dsty=by;
+}
