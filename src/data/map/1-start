@@ -41,3 +41,5 @@ sprite @15,8 sprite:password (u8)0 (u8:timescale)normal 0x0000
 sprite @12,8 sprite:password (u8)0 (u8:timescale)normal 0x0000
 sprite @13,8 sprite:password (u8)0 (u8:timescale)normal 0x0000
 sprite @14,8 sprite:password (u8)0 (u8:timescale)normal 0x0000
+sprite @31,13 sprite:conveyor (u8)4 (u8)0x08 (u8:timescale)normal 0x00
+sprite @20,16 sprite:conveyor (u8)6 (u8)0x10 (u8:timescale)normal 0x00

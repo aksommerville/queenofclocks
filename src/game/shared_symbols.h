@@ -47,6 +47,7 @@
 #define NS_sprtype_motionsensor 7 /* (u32)0 */
 #define NS_sprtype_password     8 /* (u8)v (u8:timescale)normal 0x0000 */
 #define NS_sprtype_passgate     9 /* (u32)password */
+#define NS_sprtype_conveyor    10 /* (u8)w (u8)dir (u8:timescale)normal 0x00 */
 #define FOR_EACH_SPRTYPE \
   _(dummy) \
   _(hero) \
@@ -56,7 +57,8 @@
   _(fryguy) \
   _(motionsensor) \
   _(password) \
-  _(passgate)
+  _(passgate) \
+  _(conveyor)
   
 #define NS_sprgrp_keepalive  0 /* Programmatic access only. */
 #define NS_sprgrp_deathrow   1 /* Programmatic access only. */
