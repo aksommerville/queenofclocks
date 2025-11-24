@@ -147,6 +147,8 @@ int gameover_begin() {
   struct label *label;
   g.gameover=1;
   gameover.blackout=1.000;
+
+  egg_play_song(1,RID_song_cleaned_clock,0,0.400,0.0);
   
   int score=gameover_calculate_score(g.playtime,g.deathc);
   
