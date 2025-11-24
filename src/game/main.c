@@ -34,7 +34,7 @@ int egg_client_init() {
   g.grpv[NS_sprgrp_render].order=SPRITE_GROUP_ORDER_RENDER;
   
   // We only have one song and it plays forever.
-  egg_play_song(1,1,1,1.0f,0.0f);
+  egg_play_song(1,1,1,0.400f,0.0f);
   
   if (qc_scene_load(RID_map_start)<0) return -1;
 
@@ -54,12 +54,13 @@ void egg_client_update(double elapsed) {
     return;
   }
   
-  //XXX TEMP: AUX1 to restart, for when I get trapped. And AUX2 to skip level.
+  /*XXX TEMP: AUX1 to restart, for when I get trapped. And AUX2 to skip level.
   if ((g.input&EGG_BTN_AUX1)&&!(g.pvinput&EGG_BTN_AUX1)) {
     qc_scene_load(g.mapid);
   } else if ((g.input&EGG_BTN_AUX2)&&!(g.pvinput&EGG_BTN_AUX2)) {
     if (g.grpv[NS_sprgrp_hero].sprc) sprite_hero_force_victory(g.grpv[NS_sprgrp_hero].sprv[0]);
   }
+  /**/
 
   if (g.gameover) {
     gameover_update(elapsed);

@@ -25,7 +25,8 @@ T 2025-11-25 Jam ends at 11:00.
 - [x] Real maps. 10..15 should be good.
 - [x] Put maps in order.
 - [x] Don't wand thru walls. Or do. Or a fixed distance limit. Does it matter? ...it's better with wand-thru-wall, hey it's magic
-- [ ] Sound effects.
+- [x] Sound effects.
 - [x] Scorekeeping.
 - [ ] AUX1 for a quickie menu. Restart Level, End Game, Quit. Important because I can't guarantee there won't be any soft-lock situations.
 - [x] End of game. Don't just loop to the start again!
+- [ ] Game over music.

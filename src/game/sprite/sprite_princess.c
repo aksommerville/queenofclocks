@@ -41,6 +41,7 @@ static void _princess_injure(struct sprite *sprite,struct sprite *assailant) {
 }
 
 static void _princess_interact(struct sprite *sprite,struct sprite *hero) {
+  if (g.termclock>0.0) return;
   qc_sound(RID_sound_rescue,sprite->x+sprite->w*0.5);
   sprite_hero_force_victory(hero);
 }
