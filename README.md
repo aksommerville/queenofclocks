@@ -30,3 +30,5 @@ T 2025-11-25 Jam ends at 11:00.
 - [ ] AUX1 for a quickie menu. Restart Level, End Game, Quit. Important because I can't guarantee there won't be any soft-lock situations.
 - [x] End of game. Don't just loop to the start again!
 - [ ] Game over music.
+
+Best time: 2:33.135

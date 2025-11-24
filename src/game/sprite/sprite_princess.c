@@ -8,6 +8,7 @@
 struct sprite_princess {
   struct sprite hdr;
   double cryclock;
+  double interact_blackout;
 };
 
 #define SPRITE ((struct sprite_princess*)sprite)
@@ -25,6 +26,7 @@ static void _princess_update(struct sprite *sprite,double elapsed) {
   if ((SPRITE->cryclock-=elapsed)<0.0) {
     princess_reset_cryclock(sprite);
   }
+  if (SPRITE->interact_blackout>0.0) SPRITE->interact_blackout-=elapsed;
   sprite_move(sprite,0.0,GRAVITY*elapsed);
 }
 
@@ -42,6 +44,8 @@ static void _princess_injure(struct sprite *sprite,struct sprite *assailant) {
 
 static void _princess_interact(struct sprite *sprite,struct sprite *hero) {
   if (g.termclock>0.0) return;
+  if (SPRITE->interact_blackout>0.0) return;
+  SPRITE->interact_blackout=2.0;
   qc_sound(RID_sound_rescue,sprite->x+sprite->w*0.5);
   sprite_hero_force_victory(hero);
 }

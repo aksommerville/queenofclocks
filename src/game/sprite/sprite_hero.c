@@ -48,11 +48,11 @@ static int _hero_init(struct sprite *sprite) {
 int sprite_hero_in_victory_position(const struct sprite *sprite) {
   if (!sprite||(sprite->type!=&sprite_type_hero)) return 0;
   
+  // Did we rescue a princess? Don't wait for release.
+  if (SPRITE->force_victory) return 1;
+  
   // Must be standing still and idle.
   if (SPRITE->falling||SPRITE->wanding||SPRITE->walking) return 0;
-  
-  // Did we rescue a princess?
-  if (SPRITE->force_victory) return 1;
   
   // Examine the one cell directly below our feet. It must have "goal" physics.
   int x=(int)(sprite->x+sprite->w*0.5);
