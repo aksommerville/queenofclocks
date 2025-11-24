@@ -23,7 +23,7 @@ T 2025-11-25 Jam ends at 11:00.
 - [x] Flammable blocks that when fryguy encounters one, he farts fire on it. ...no
 - [x] Other moving hazards. Chainsaw on wheels, etc. ...we're good
 - [x] Real maps. 10..15 should be good.
-- [ ] Put maps in order.
+- [x] Put maps in order.
 - [x] Don't wand thru walls. Or do. Or a fixed distance limit. Does it matter? ...it's better with wand-thru-wall, hey it's magic
 - [ ] Sound effects.
 - [x] Scorekeeping.
