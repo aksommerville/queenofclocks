@@ -19,29 +19,11 @@ T 2025-11-25 Jam ends at 11:00.
 
 ## TODO
 
-- [x] I think the current graphics are too fussy. Don't use an outline. Try a black sky and light walls (unoutlined sprites would read great against black).
-- [x] Hero motion.
-- [x] Physics. Generalize. We'll need a strong concept of seating, there's going to be lots of moving platforms.
-- [x] Static hazards, death.
-- [x] Allow to change wand direction if no pumpkin captured yet.
-- [x] One-way platforms? I didn't account for these in physics. Do we want? ...no
 - [ ] Wall hugging?
-- [x] Wall jump? ...no, too much power
-- [x] Moving platforms.
-- - [x] How to communicate with the hero? It's important that riding platforms operate smoothly.
-- [x] Pushable blocks. (are we doing that?) ...no
-- [x] Timed flamethrowers.
-- [x] Motion-activated anti-burglar laser. Esp to give you a reason to direct fryguy's movement.
 - [ ] Flammable blocks that when fryguy encounters one, he farts fire on it.
 - [ ] Other moving hazards. Chainsaw on wheels, etc.
-- [x] Conveyor belts.
-- [x] Soulballs.
-- [x] Password-entry puzzle where there are changing digits you can adjust.
 - [ ] Real maps. 10..15 should be good.
 - [ ] Don't wand thru walls. Or do. Or a fixed distance limit. Does it matter? 
-- [x] Wand.
-- [x] Goal and advancement.
-- [x] Music. I think just one song.
 - [ ] Sound effects.
 - [ ] Scorekeeping.
 - [ ] AUX1 for a quickie menu. Restart Level, End Game, Quit. Important because I can't guarantee there won't be any soft-lock situations.

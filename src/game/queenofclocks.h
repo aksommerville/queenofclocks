@@ -15,6 +15,9 @@
 // Track so many recent sounds. Don't play it again within some brief interval.
 #define SNDPLAY_LIMIT 8
 
+// Normally 1, but use (-1) to cycle backward, while designing maps.
+#define NEXT_MAP (-1)
+
 struct frect { double l,r,t,b; };
 
 extern struct g {
@@ -49,6 +52,7 @@ void qc_sound(int rid,double x); // (x<0) if non-spatial, otherwise in 0..NS_sys
 // res.c
 int qc_res_init();
 int qc_res_get(void *dstpp,int tid,int rid); // Not all resources are recorded.
+int qc_res_last_id(int tid);
 
 // scene.c
 int qc_scene_load(int mapid);

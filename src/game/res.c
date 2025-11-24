@@ -82,10 +82,10 @@ int qc_res_init() {
   return qc_res_link();
 }
 
-/* Get resource.
+/* Search registry.
  */
  
-int qc_res_get(void *dstpp,int tid,int rid) {
+static int qc_res_search(int tid,int rid) {
   int lo=0,hi=g.resc;
   while (lo<hi) {
     int ck=(lo+hi)>>1;
@@ -94,10 +94,31 @@ int qc_res_get(void *dstpp,int tid,int rid) {
     else if (tid>q->tid) lo=ck+1;
     else if (rid<q->rid) hi=ck;
     else if (rid>q->rid) lo=ck+1;
-    else {
-      *(const void**)dstpp=q->v;
-      return q->c;
-    }
+    else return ck;
   }
-  return 0;
+  return -lo-1;
+}
+
+/* Get resource.
+ */
+ 
+int qc_res_get(void *dstpp,int tid,int rid) {
+  int p=qc_res_search(tid,rid);
+  if (p<0) return 0;
+  const struct rom_entry *res=g.resv+p;
+  *(const void**)dstpp=res->v;
+  return res->c;
+}
+
+/* Last id for resource.
+ */
+ 
+int qc_res_last_id(int tid) {
+  int p=qc_res_search(tid+1,0);
+  if (p<0) p=-p-1;
+  p--;
+  if (p<0) return 0;
+  const struct rom_entry *res=g.resv+p;
+  if (res->tid!=tid) return 0;
+  return res->rid;
 }

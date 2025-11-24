@@ -46,6 +46,7 @@ int qc_scene_load(int mapid) {
      * We're not doing modals; the first map is our Hello and Gameover screen too.
      */
     if (mapid==RID_map_start) return -1;
+    if (NEXT_MAP<0) return qc_scene_load(qc_res_last_id(EGG_TID_map));
     return qc_scene_load(RID_map_start);
   }
   
@@ -97,7 +98,7 @@ static int qc_scene_check_completion(double elapsed) {
   if (g.termclock>0.0) {
     if ((g.termclock-=elapsed)>0.0) return 0; // please hold
     if (hero) {
-      return qc_scene_load(g.mapid+1);
+      return qc_scene_load(g.mapid+NEXT_MAP);
     } else {
       return qc_scene_load(g.mapid);
     }
