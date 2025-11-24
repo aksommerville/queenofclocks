@@ -122,3 +122,23 @@ int qc_res_last_id(int tid) {
   if (res->tid!=tid) return 0;
   return res->rid;
 }
+
+/* Get string.
+ */
+ 
+int qc_res_get_string(void *dstpp,int rid,int ix) {
+  if (rid<0x40) rid|=egg_prefs_get(EGG_PREF_LANG)<<6;
+  const void *serial=0;
+  int serialc=qc_res_get(&serial,EGG_TID_strings,rid);
+  struct strings_reader reader;
+  if (strings_reader_init(&reader,serial,serialc)<0) return 0;
+  struct strings_entry string;
+  while (strings_reader_next(&string,&reader)>0) {
+    if (string.index==ix) {
+      *(const void**)dstpp=string.v;
+      return string.c;
+    }
+    if (string.index>ix) return 0;
+  }
+  return 0;
+}

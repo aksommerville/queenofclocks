@@ -24,7 +24,10 @@ int egg_client_init() {
   
   if (egg_texture_load_image(g.texid_terrain=egg_texture_new(),RID_image_terrain)<0) return -1;
   if (egg_texture_load_image(g.texid_sprites=egg_texture_new(),RID_image_sprites)<0) return -1;
+  if (egg_texture_load_image(g.texid_font=egg_texture_new(),RID_image_font)<0) return -1;
   if (egg_texture_load_raw(g.texid_bgbits=egg_texture_new(),FBW,FBH,FBW<<2,0,0)<0) return -1;
+  
+  qc_hiscore_load();
 
   srand_auto();
   
@@ -51,22 +54,31 @@ void egg_client_update(double elapsed) {
     return;
   }
   
-  //XXX TEMP: AUX1 to restart, for when I get trapped.
+  //XXX TEMP: AUX1 to restart, for when I get trapped. And AUX2 to skip level.
   if ((g.input&EGG_BTN_AUX1)&&!(g.pvinput&EGG_BTN_AUX1)) {
     qc_scene_load(g.mapid);
+  } else if ((g.input&EGG_BTN_AUX2)&&!(g.pvinput&EGG_BTN_AUX2)) {
+    if (g.grpv[NS_sprgrp_hero].sprc) sprite_hero_force_victory(g.grpv[NS_sprgrp_hero].sprv[0]);
   }
 
-  qc_scene_update(elapsed);
-  
-  ctlpan_update(elapsed);
+  if (g.gameover) {
+    gameover_update(elapsed);
+  } else {
+    qc_scene_update(elapsed);
+    ctlpan_update(elapsed);
+  }
 }
 
 
 void egg_client_render() {
   g.framec++;
   graf_reset(&g.graf);
-  qc_scene_render();
-  ctlpan_render();
+  if (g.gameover) {
+    gameover_render();
+  } else {
+    qc_scene_render();
+    ctlpan_render();
+  }
   graf_flush(&g.graf);
 }
 
@@ -94,4 +106,37 @@ void qc_sound(int rid,double x) {
     pan=(x*2.0)/NS_sys_mapw-1.0;
   }
   egg_play_sound(rid,1.0,pan);
+}
+
+/* High score.
+ */
+ 
+void qc_hiscore_load() {
+  g.hiscore=0;
+  char tmp[6]; // Not allowed to exceed 6 digits.
+  int tmpc=egg_store_get(tmp,sizeof(tmp),"hiscore",7);
+  if ((tmpc<1)||(tmpc>sizeof(tmp))) return;
+  int i=0;
+  for (;i<tmpc;i++) {
+    char digit=tmp[i];
+    if ((digit<'0')||(digit>'9')) {
+      g.hiscore=0;
+      return;
+    }
+    g.hiscore*=10;
+    g.hiscore+=digit-'0';
+  }
+}
+
+void qc_hiscore_save() {
+  if (g.hiscore>999999) g.hiscore=999999;
+  char tmp[]={
+    '0'+(g.hiscore/100000)%10,
+    '0'+(g.hiscore/ 10000)%10,
+    '0'+(g.hiscore/  1000)%10,
+    '0'+(g.hiscore/   100)%10,
+    '0'+(g.hiscore/    10)%10,
+    '0'+(g.hiscore       )%10,
+  };
+  egg_store_set("hiscore",7,tmp,sizeof(tmp));
 }

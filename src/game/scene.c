@@ -30,6 +30,44 @@ static void qc_bgbits_render() {
   egg_render(&un,vtxv,sizeof(vtxv));
 }
 
+/* Add high score to bgbits.
+ */
+ 
+static void qc_bgbits_add_hiscore(int hiscore) {
+  if (hiscore<0) hiscore=0; else if (hiscore>999999) hiscore=999999;
+  
+  char tmp[6];
+  int tmpc=0;
+  if (hiscore>=100000) tmp[tmpc++]='0'+(hiscore/100000)%10;
+  if (hiscore>= 10000) tmp[tmpc++]='0'+(hiscore/ 10000)%10;
+  if (hiscore>=  1000) tmp[tmpc++]='0'+(hiscore/  1000)%10;
+  if (hiscore>=   100) tmp[tmpc++]='0'+(hiscore/   100)%10;
+  if (hiscore>=    10) tmp[tmpc++]='0'+(hiscore/    10)%10;
+                       tmp[tmpc++]='0'+(hiscore       )%10;
+  
+  const char *lbl=0;
+  int lblc=qc_res_get_string(&lbl,1,7);
+  
+  const char *sep=": ";
+  int sepc=2;
+  
+  int chc=lblc+sepc+tmpc;
+  int w=8*chc;
+  int x=(FBW>>1)-(w>>1)+(NS_sys_tilesize>>1);
+  int y=7;
+  int i;
+  const char *src;
+  graf_reset(&g.graf);
+  graf_set_output(&g.graf,g.texid_bgbits);
+  graf_set_input(&g.graf,g.texid_font);
+  graf_set_tint(&g.graf,0x808080ff);
+  for (i=lblc,src=lbl;i-->0;src++,x+=8) if (*src>0x20) graf_tile(&g.graf,x,y,*src,0);
+  for (i=sepc,src=sep;i-->0;src++,x+=8) if (*src>0x20) graf_tile(&g.graf,x,y,*src,0);
+  for (i=tmpc,src=tmp;i-->0;src++,x+=8) if (*src>0x20) graf_tile(&g.graf,x,y,*src,0);
+  graf_flush(&g.graf);
+  graf_set_output(&g.graf,1);
+}
+
 /* Tear down current scene and replace.
  */
  
@@ -42,12 +80,14 @@ int qc_scene_load(int mapid) {
   struct map_res map={0};
   if (map_res_decode(&map,serial,serialc)<0) {
     /* Can only mean Not Found; every map is validated at load.
-     * If this is the first map, fail. Otherwise try loading the first one.
-     * We're not doing modals; the first map is our Hello and Gameover screen too.
+     * If this is the first map, fail. Otherwise start game-over.
      */
     if (mapid==RID_map_start) return -1;
+    /* Loop after the last level. Need this if you're going backward. *
     if (NEXT_MAP<0) return qc_scene_load(qc_res_last_id(EGG_TID_map));
     return qc_scene_load(RID_map_start);
+    /**/
+    return gameover_begin();
   }
   
   /* Drop any volatile state.
@@ -60,6 +100,7 @@ int qc_scene_load(int mapid) {
   g.cellv=map.v;
   g.termclock=0.0;
   g.fadeclock=FADE_IN_TIME;
+  g.fake_map=0;
   qc_bgbits_render();
   
   /* Run commands.
@@ -69,6 +110,13 @@ int qc_scene_load(int mapid) {
   struct cmdlist_entry cmd;
   while (cmdlist_reader_next(&cmd,&reader)>0) {
     switch (cmd.opcode) {
+    
+      case CMD_map_fake: {
+          g.playtime=0.0;
+          g.deathc=0;
+          g.fake_map=1;
+          if (g.hiscore) qc_bgbits_add_hiscore(g.hiscore);
+        } break;
     
       case CMD_map_sprite: {
           double x=cmd.arg[0]+0.5;
@@ -106,6 +154,7 @@ static int qc_scene_check_completion(double elapsed) {
   
   // If the hero is missing, you lose. Start ticking the clock.
   if (!hero) {
+    if (!g.fake_map) g.deathc++;
     g.termclock=g.termtime=FADE_OUT_TIME_LOSE;
     return 0;
   }
@@ -124,6 +173,7 @@ static int qc_scene_check_completion(double elapsed) {
 void qc_scene_update(double elapsed) {
 
   if (g.fadeclock>0.0) g.fadeclock-=elapsed;
+  if (!g.fake_map) g.playtime+=elapsed;
   
   // Check completion. Do this at the start of the cycle, so a newly-loaded scene gets its first update before its first render.
   if (qc_scene_check_completion(elapsed)<0) {
@@ -187,5 +237,31 @@ void qc_scene_render() {
     graf_fill_rect(&g.graf,0,0,FBW,FBH,0x00000000|fadealpha);
   }
 
-  //TODO overlay?
+  // On the hello map, show hiscore if nonzero. Others, show play time and death count.
+  if (g.fake_map) {
+    // Actually, we write the high score directly onto (g.bgbits). It can't change during play.
+  } else {
+    graf_set_input(&g.graf,g.texid_font);
+    
+    int y=4;
+    graf_tile(&g.graf,4,y,0x80,0); // skull
+    int x=15;
+    int v=g.deathc; if (v>999) v=999; else if (v<0) v=0;
+    if (v>=100) { graf_tile(&g.graf,x,y,'0'+v/100,0); x+=8; }
+    if (v>=10) { graf_tile(&g.graf,x,y,'0'+(v/10)%10,0); x+=8; }
+    graf_tile(&g.graf,x,y,'0'+v%10,0);
+    
+    graf_tile(&g.graf,FBW-4,y,0x81,0); // hourglass
+    int ms=(int)(g.playtime*1000.0);
+    if (ms<0) ms=0;
+    int sec=ms/1000; ms%=1000;
+    int min=sec/60; sec%=60;
+    if (min>99) min=sec=99;
+    x=FBW-15;
+    graf_tile(&g.graf,x,y,'0'+sec%10,0); x-=8;
+    graf_tile(&g.graf,x,y,'0'+sec/10,0); x-=8;
+    if (ms<800) graf_tile(&g.graf,x,y,':',0); x-=8;
+    graf_tile(&g.graf,x,y,'0'+min%10,0); x-=8;
+    if (min>=10) graf_tile(&g.graf,x,y,'0'+min/10,0);
+  }
 }

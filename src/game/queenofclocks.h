@@ -28,9 +28,10 @@ extern struct g {
   int resc,resa;
   int input,pvinput;
   
-  // We'll use just two tilesheets. Load them in advance, globally.
+  // We'll use just three tilesheets. Load them in advance, globally.
   int texid_terrain;
   int texid_sprites;
+  int texid_font;
   uint8_t physics[256];
   struct sndplay { double time; int rid; } sndplayv[SNDPLAY_LIMIT];
   
@@ -43,16 +44,25 @@ extern struct g {
   double fadeclock; // '' fading in.
   double termtime; // Range for termclock (fadeclock's is constant).
   int framec; // Global.
+  double playtime; // Per session.
+  int deathc;
+  int fake_map; // Nonzero if we're on a map where stats are ignored.
+  int hiscore; // Loaded at startup. Save if you update. Limit to six decimal digits.
   
   struct sprite_group ctlpan_pumpkin;
+  
+  int gameover;
 } g;
 
 void qc_sound(int rid,double x); // (x<0) if non-spatial, otherwise in 0..NS_sys_mapw and we pan accordingly
+void qc_hiscore_load();
+void qc_hiscore_save();
 
 // res.c
 int qc_res_init();
 int qc_res_get(void *dstpp,int tid,int rid); // Not all resources are recorded.
 int qc_res_last_id(int tid);
+int qc_res_get_string(void *dstpp,int rid,int ix);
 
 // scene.c
 int qc_scene_load(int mapid);
@@ -65,5 +75,10 @@ void ctlpan_dismiss();
 struct sprite *ctlpan_is_active(); // Fine to update, render, whatever, when we're dismissed. But call this if you actually need to know. Returns the pumpkin if active.
 void ctlpan_update(double elapsed);
 void ctlpan_render();
+
+// gameover.c
+int gameover_begin();
+void gameover_update(double elapsed);
+void gameover_render();
 
 #endif

@@ -10,6 +10,7 @@
 #define NS_sys_maph 22
 #define EGGDEV_ignoreData "" /* Comma-delimited glob patterns for editor to ignore under src/data/ */
 
+#define CMD_map_fake      0x01 /* Not a real level. Stats reset on load and are not collected here. */
 #define CMD_map_image     0x20 /* u16:imageid */
 #define CMD_map_sprite    0x61 /* u16:position, u16:spriteid, u32:arg */
 

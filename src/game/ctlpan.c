@@ -70,6 +70,7 @@ void ctlpan_render() {
   // (by) can't be oob because we've oriented centerward of the pumpkin.
   
   // Background tiles.
+  graf_set_input(&g.graf,g.texid_sprites);
   const int halftile=NS_sys_tilesize>>1;
   int x=bx+halftile;
   int y=by+halftile;
