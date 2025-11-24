@@ -94,6 +94,7 @@ struct sprite *sprite_new(double x,double y,const struct sprite_type *type,int r
   if (type->init&&(type->init(sprite)<0)) {
     sprite_kill(sprite);
     sprite_del(sprite);
+    return 0;
   }
   
   return sprite;

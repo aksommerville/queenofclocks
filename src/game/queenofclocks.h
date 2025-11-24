@@ -16,7 +16,7 @@
 #define SNDPLAY_LIMIT 8
 
 // Normally 1, but use (-1) to cycle backward, while designing maps.
-#define NEXT_MAP (-1)
+#define NEXT_MAP 1
 
 struct frect { double l,r,t,b; };
 

@@ -19,11 +19,12 @@ T 2025-11-25 Jam ends at 11:00.
 
 ## TODO
 
-- [ ] Wall hugging?
-- [ ] Flammable blocks that when fryguy encounters one, he farts fire on it.
-- [ ] Other moving hazards. Chainsaw on wheels, etc.
-- [ ] Real maps. 10..15 should be good.
-- [ ] Don't wand thru walls. Or do. Or a fixed distance limit. Does it matter? 
+- [x] Wall hugging? ...nah
+- [x] Flammable blocks that when fryguy encounters one, he farts fire on it. ...no
+- [x] Other moving hazards. Chainsaw on wheels, etc. ...we're good
+- [x] Real maps. 10..15 should be good.
+- [ ] Put maps in order.
+- [x] Don't wand thru walls. Or do. Or a fixed distance limit. Does it matter? ...it's better with wand-thru-wall, hey it's magic
 - [ ] Sound effects.
 - [ ] Scorekeeping.
 - [ ] AUX1 for a quickie menu. Restart Level, End Game, Quit. Important because I can't guarantee there won't be any soft-lock situations.

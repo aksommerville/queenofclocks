@@ -103,6 +103,17 @@ static void sprite_check_damage(struct sprite *a,struct sprite *b) {
   }
 }
 
+/* Extra tasks when a sprite's motion is fully blocked by another sprite.
+ * Returns zero as a convenience for sprite_move().
+ */
+ 
+static int full_sprite_collision(struct sprite *a,struct sprite *b) {
+  // Hacky trigger for hero-princess interaction. Really there should be an "interacter" group for this.
+  if ((a->type==&sprite_type_hero)&&b->type->interact) b->type->interact(b,a);
+  if ((b->type==&sprite_type_hero)&&a->type->interact) a->type->interact(a,b);
+  return 0;
+}
+
 /* Move sprite, public entry point.
  */
  
@@ -208,29 +219,29 @@ int sprite_move(struct sprite *sprite,double dx,double dy) {
     switch (dir) {
       case DIR_W: {
           nx=other->x+other->w;
-          if (nx>=sprite->x) return 0;
+          if (nx>=sprite->x) return full_sprite_collision(sprite,other);
           fullx=nx;
           fullw=sprite->x+sprite->w-nx;
           fullr=fullx+fullw;
         } break;
       case DIR_E: {
           nx=other->x-sprite->w;
-          if (nx<=sprite->x) return 0;
+          if (nx<=sprite->x) return full_sprite_collision(sprite,other);
           fullw=nx+sprite->w-sprite->x;
           fullr=fullx+fullw;
         } break;
       case DIR_N: {
           // If we are carrful, try pushing the other guy first. And then react as usual.
-          if (sprite->type->carrful) sprite_move(other,0.0,dy);
+          if (sprite->type->carrful&&!sprite_group_has(g.grpv+NS_sprgrp_dontcarry,other)) sprite_move(other,0.0,dy);
           ny=other->y+other->h;
-          if (ny>=sprite->y) return 0;
+          if (ny>=sprite->y) return full_sprite_collision(sprite,other);
           fully=ny;
           fullh=sprite->y+sprite->h-ny;
           fullb=fully+fullh;
         } break;
       case DIR_S: {
           ny=other->y-sprite->h;
-          if (ny<=sprite->y) return 0;
+          if (ny<=sprite->y) return full_sprite_collision(sprite,other);
           fullh=ny+sprite->h-sprite->y;
           fullb=fully+fullh;
         } break;
@@ -253,6 +264,7 @@ int sprite_move(struct sprite *sprite,double dx,double dy) {
       if ((e<-SMALL)||(e>SMALL)) continue;
       if (other->x+other->w<=fullx) continue;
       if (other->x>=fullx+fullw) continue;
+      if (sprite_group_has(g.grpv+NS_sprgrp_dontcarry,other)) continue;
       sprite_move(other,dx,dy);
       // There's a little snafu here. Ride a platform and you and the platform change to the next pixel at different times, so you jitter relative to each other.
       // We might be able to mitigate it by fudging the rider's position at the moment they make contact.

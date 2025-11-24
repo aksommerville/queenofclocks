@@ -57,6 +57,8 @@ static void _conveyor_update(struct sprite *sprite,double elapsed) {
     double qy=other->y+other->h;
     double dy=qy-t;
     if ((dy<-0.001)||(dy>0.001)) continue;
+    // If it's in the dontcarry group, don't carry it.
+    if (sprite_group_has(g.grpv+NS_sprgrp_dontcarry,other)) continue;
     // If we're at infinite speed, move the sprite all the way to my edge (or as far as it will go).
     if (sprite->timescale==NS_timescale_infinite) {
       if (dx<0.0) sprite_move(other,l-(other->x+other->w),0.0);

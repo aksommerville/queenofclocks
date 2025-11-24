@@ -88,23 +88,7 @@ static void _platform_update(struct sprite *sprite,double elapsed) {
  */
  
 static void _platform_grab(struct sprite *sprite,int grab,struct sprite *grabber,uint8_t dir) {
-  if (SPRITE->grabbed=grab) {
-    // If we're moving on the perpendicular axis, snap to the grabber's middle.
-    /*XXX or maybe not. This introduces a lot of uncertainty.
-    if (grabber) {
-      switch (dir) {
-        case DIR_W: case DIR_E: if (SPRITE->idy) {
-            double ny=grabber->y+grabber->h*0.5-sprite->h*0.5;
-            sprite_move(sprite,0.0,ny-sprite->y);
-          } break;
-        case DIR_N: case DIR_S: {
-            double nx=grabber->x+grabber->w*0.5-sprite->w*0.5;
-            sprite_move(sprite,nx-sprite->x,0.0);
-          } break;
-      }
-    }
-    /**/
-  }
+  SPRITE->grabbed=grab;
 }
 
 /* Render.

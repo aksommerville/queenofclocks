@@ -1,0 +1,4 @@
+type (u16:sprtype)princess
+image image:sprites
+tile 131 0
+groups (b32:sprgrp)render,update,physics,fragile

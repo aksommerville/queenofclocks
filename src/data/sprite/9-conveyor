@@ -1,4 +1,4 @@
 type (u16:sprtype)conveyor
 image image:sprites
 tile 128 0
-groups (b32:sprgrp)render,update,physics,motion
+groups (b32:sprgrp)render,update,physics,motion,dontcarry

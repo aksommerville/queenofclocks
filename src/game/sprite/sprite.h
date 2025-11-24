@@ -52,6 +52,11 @@ struct sprite_type {
    * DO NOT DELETE either sprite! (but then that is standing policy for all hooks too).
    */
   void (*injure)(struct sprite *sprite,struct sprite *assailant);
+  
+  /* Called, hackily, when the hero touches you.
+   * Must be in physics group.
+   */
+  void (*interact)(struct sprite *sprite,struct sprite *hero);
 };
 
 struct sprite_group {
@@ -98,6 +103,7 @@ const struct sprite_type *sprite_type_from_id(int id);
 const struct sprite_type *sprite_type_from_commands(const void *v,int c);
 
 int sprite_hero_in_victory_position(const struct sprite *sprite);
+void sprite_hero_force_victory(struct sprite *sprite);
 
 /* Examines all the password sprites and returns the displayed value, or <0 if invalid.
  * There's some magic caching in the background, it's fine to spam this.

@@ -16,6 +16,7 @@ struct sprite_hero {
   int wanddir; // -1,0,1 = up,horz,down
   int walking; // -1,0,1
   double gravity; // Jump or fall power.
+  int force_victory; // Cheesy hack for rescuing the princess.
 };
 
 #define SPRITE ((struct sprite_hero*)sprite)
@@ -50,6 +51,9 @@ int sprite_hero_in_victory_position(const struct sprite *sprite) {
   // Must be standing still and idle.
   if (SPRITE->falling||SPRITE->wanding||SPRITE->walking) return 0;
   
+  // Did we rescue a princess?
+  if (SPRITE->force_victory) return 1;
+  
   // Examine the one cell directly below our feet. It must have "goal" physics.
   int x=(int)(sprite->x+sprite->w*0.5);
   if ((x<0)||(x>=NS_sys_mapw)) return 0;
@@ -59,6 +63,11 @@ int sprite_hero_in_victory_position(const struct sprite *sprite) {
   
   // Hooray!
   return 1;
+}
+
+void sprite_hero_force_victory(struct sprite *sprite) {
+  if (!sprite||(sprite->type!=&sprite_type_hero)) return;
+  SPRITE->force_victory=1;
 }
 
 /* Get dead.
