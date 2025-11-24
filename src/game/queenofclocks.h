@@ -34,6 +34,7 @@ extern struct g {
   int texid_font;
   uint8_t physics[256];
   struct sndplay { double time; int rid; } sndplayv[SNDPLAY_LIMIT];
+  int song_rid;
   
   int texid_bgbits;
   int mapid;
@@ -56,6 +57,7 @@ extern struct g {
 } g;
 
 void qc_sound(int rid,double x); // (x<0) if non-spatial, otherwise in 0..NS_sys_mapw and we pan accordingly
+void qc_song(int rid,int repeat);
 void qc_hiscore_load();
 void qc_hiscore_save();
 

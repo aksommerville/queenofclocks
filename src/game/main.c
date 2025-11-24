@@ -33,9 +33,6 @@ int egg_client_init() {
   
   g.grpv[NS_sprgrp_render].order=SPRITE_GROUP_ORDER_RENDER;
   
-  // We only have one song and it plays forever.
-  egg_play_song(1,1,1,0.400f,0.0f);
-  
   if (qc_scene_load(RID_map_start)<0) return -1;
 
   return 0;
@@ -114,6 +111,12 @@ void qc_sound(int rid,double x) {
     pan=(x*2.0)/NS_sys_mapw-1.0;
   }
   egg_play_sound(rid,1.0,pan);
+}
+
+void qc_song(int rid,int repeat) {
+  if (rid==g.song_rid) return;
+  g.song_rid=rid;
+  egg_play_song(1,rid,repeat,0.400,0.0);
 }
 
 /* High score.

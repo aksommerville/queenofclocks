@@ -116,6 +116,7 @@ int qc_scene_load(int mapid) {
           g.deathc=0;
           g.fake_map=1;
           if (g.hiscore) qc_bgbits_add_hiscore(g.hiscore);
+          qc_song(RID_song_moonlight_savings_time,1);
         } break;
     
       case CMD_map_sprite: {
