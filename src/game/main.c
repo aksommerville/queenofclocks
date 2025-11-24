@@ -61,9 +61,15 @@ void egg_client_update(double elapsed) {
     if (g.grpv[NS_sprgrp_hero].sprc) sprite_hero_force_victory(g.grpv[NS_sprgrp_hero].sprv[0]);
   }
   /**/
+  if (!g.gameover&&(g.input&EGG_BTN_AUX1)&&!(g.pvinput&EGG_BTN_AUX1)) {
+    if (g.pause) pause_dismiss();
+    else pause_begin();
+  }
 
   if (g.gameover) {
     gameover_update(elapsed);
+  } else if (g.pause) {
+    pause_update(elapsed);
   } else {
     qc_scene_update(elapsed);
     ctlpan_update(elapsed);
@@ -79,6 +85,7 @@ void egg_client_render() {
   } else {
     qc_scene_render();
     ctlpan_render();
+    if (g.pause) pause_render();
   }
   graf_flush(&g.graf);
 }

@@ -22,7 +22,7 @@
 23111111111111242121212121212121212121212121212121212121212121231111111111111124
 
 image image:terrain
-sprite @8,6 sprite:platform 1 0 3 (u8:timescale)normal
+sprite @10,6 sprite:platform 255 0 3 (u8:timescale)normal
 sprite @5,4 sprite:hero (u32)0
 sprite @2,18 sprite:platform 0 255 3 (u8:timescale)stop
 sprite @38,8 sprite:flamethrower 0x10 (u8:timescale)infinite 0x80 6

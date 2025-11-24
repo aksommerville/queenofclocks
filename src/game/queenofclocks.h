@@ -52,6 +52,7 @@ extern struct g {
   struct sprite_group ctlpan_pumpkin;
   
   int gameover;
+  int pause;
 } g;
 
 void qc_sound(int rid,double x); // (x<0) if non-spatial, otherwise in 0..NS_sys_mapw and we pan accordingly
@@ -80,5 +81,11 @@ void ctlpan_render();
 int gameover_begin();
 void gameover_update(double elapsed);
 void gameover_render();
+
+// pause.c
+void pause_begin();
+void pause_dismiss();
+void pause_update(double elapsed);
+void pause_render(); // Scene also renders but does not update.
 
 #endif
