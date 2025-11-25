@@ -31,4 +31,4 @@ T 2025-11-25 Jam ends at 11:00.
 - [x] End of game. Don't just loop to the start again!
 - [x] Game over music.
 
-Best time: 2:31.706
+Best time: 2:15.534
