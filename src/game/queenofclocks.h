@@ -2,9 +2,9 @@
 #define EGG_GAME_MAIN_H
 
 #include "egg/egg.h"
-#include "opt/stdlib/egg-stdlib.h"
-#include "opt/graf/graf.h"
-#include "opt/res/res.h"
+#include "util/stdlib/egg-stdlib.h"
+#include "util/graf/graf.h"
+#include "util/res/res.h"
 #include "egg_res_toc.h"
 #include "shared_symbols.h"
 #include "sprite/sprite.h"
