@@ -5,6 +5,9 @@ struct g g={0};
 void egg_client_quit(int status) {
 }
 
+void egg_client_notify(int k,int v) {
+}
+
 /* Init.
  ******************************************************************/
 
